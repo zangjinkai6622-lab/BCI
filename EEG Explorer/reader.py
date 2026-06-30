@@ -12,6 +12,16 @@ Returns:
 def read_csv(path: str):
     try:
         df=pd.read_csv(path,encoding='utf-8')
+    
+    except FileNotFoundError:
+        print("Error: file not found.")
+        return None
+
     except pd.errors.EmptyDataError:
+        print("Error: empty file.")
+        return None
+
+    except UnicodeDecodeError:
+        print("Error: encoding error.")
         return None
     return df
