@@ -1,19 +1,20 @@
 import matplotlib.pyplot as plt
-from analyser import *
+import config
 import pandas as pd
 
-def plot_line(df:pd.DataFrame,column:str):
+def plot_line(df:pd.DataFrame,column:str,filename:str):
     plt.figure()
     plt.title(column)
     plt.xlabel('index')
     plt.ylabel(column)
     plt.plot(df[column])
-def plot_histogram(df:pd.DataFrame,column:str):
+    plt.savefig(config.FIGURE_DIR/filename)
+    plt.close()
+def plot_histogram(df:pd.DataFrame,column:str,filename:str):
     plt.figure()
     plt.title(column)
     plt.xlabel(column)
     plt.ylabel('frequency')
     plt.hist(df[column])
-def save_plot(filename:str):
-    plt.savefig(f'D:/BCI/EEG Explorer/output/figures/{filename}')
+    plt.savefig(config.FIGURE_DIR/filename)
     plt.close()
