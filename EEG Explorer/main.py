@@ -1,30 +1,27 @@
 from reader import read_csv
-from analyser import *
-from visualization import *
+import analyser 
+import visualization 
+import report
+
 
 def main(path: str):
     df=read_csv(path)
-    # Day1
     if df is None:
         return
-    # print(df.shape)
-    # print(df.columns)
-    # print("读取成功")
-    # Day2
-    # rows,columns=get_shape(df)
-    # print("rows:",rows)
-    # print("columns:",columns)
-    # print(get_columns(df))
-    # print(get_missing_values(df))
-    # print(get_data_type(df))
-    # print(get_statistics(df))
-
-    plot_line(df,'Age')    
-    save_plot('age_line.png')
-    # plt.show()
-    plot_histogram(df,'Age')    
-    save_plot('age_histe.png')
-    # plt.show()
+    statistics=analyser.get_statistics(df)
+    missing_values=analyser.get_missing_values(df)
+    data_type=analyser.get_data_type(df)
+    age_line1= visualization.plot_line(df,'Age','age_line1.png')
+    age_hist1= visualization.plot_histogram(df,'Age','age_hist1.png')
+    figures=[age_line1,age_hist1]
+    analysis_result={
+        'statistics':statistics,
+        'missing_values':missing_values,
+        'data_type':data_type,
+        'figures':figures
+    }
+    report.generate_report(analysis_result)
+    
 
 
 if __name__ == '__main__':

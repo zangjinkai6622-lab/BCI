@@ -10,6 +10,7 @@ def plot_line(df:pd.DataFrame,column:str,filename:str):
     plt.plot(df[column])
     plt.savefig(config.FIGURE_DIR/filename)
     plt.close()
+    return filename
 def plot_histogram(df:pd.DataFrame,column:str,filename:str):
     plt.figure()
     plt.title(column)
@@ -18,3 +19,4 @@ def plot_histogram(df:pd.DataFrame,column:str,filename:str):
     plt.hist(df[column])
     plt.savefig(config.FIGURE_DIR/filename)
     plt.close()
+    return filename

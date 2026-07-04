@@ -11,3 +11,5 @@ def get_data_type(df: pd.DataFrame):
     
 def get_statistics(df:pd.DataFrame):
     return df.describe()
+# def get_eeg_feature(df:pd.DataFrame):
+#     return df.iloc[:,1:]
