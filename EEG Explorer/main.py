@@ -7,18 +7,21 @@ def main(path: str):
     df=reader.read_csv(path)
     if df is None:
         return
-    analysis_result={
-        'dataset': {
-            'rows':analyser.get_shape(df)[0],
-            'columns':analyser.get_shape(df)[1]
 
-        },
-        'statistics':analyser.get_statistics(df),
-        'missing_values':analyser.get_missing_values(df),
-        'data_type':analyser.get_data_type(df),
+
+    analysis_result={
+        'dataset':
+            analyser.get_dataset_info(df),
+        'statistics':
+            analyser.get_statistics(df),
+        'missing_values':
+            analyser.get_missing_values(df),
+        'data_type':
+            analyser.get_data_type(df),
         'figures':[visualization.plot_line(df,'Age','age_line1.png'),
                   visualization.plot_histogram(df,'Age','age_hist1.png')
-                  ]
+                  ],
+        'interpretation':['None']
     }
     report.generate_report(analysis_result,'report.md')
     
