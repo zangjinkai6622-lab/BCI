@@ -21,7 +21,8 @@ def main(path: str):
         'figures':[visualization.plot_line(df,'Age','age_line1.png'),
                   visualization.plot_histogram(df,'Age','age_hist1.png')
                   ],
-        'interpretation':['None']
+        'interpretation':[],
+        'time_features':analyser.get_time_domain_features(df),
     }
     report.generate_report(analysis_result,'report.md')
     
