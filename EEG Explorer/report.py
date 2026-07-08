@@ -15,7 +15,7 @@ def generate_report(analysis_result:dict,filename:str):
         file.write(f"## 4. Data Types\n")               
         file.write(f"{analysis_result['data_type'].to_markdown()}\n") 
         file.write(f"## 5. Time Domain Features\n")
-        time_feature_df=pd.DataFrame(analysis_result['time_features'])
+        time_feature_df=pd.DataFrame(analysis_result['time_features']).T # 行是通道，列是特征
         file.write(f"{time_feature_df.to_markdown()}")
         file.write("\n\n")
 
