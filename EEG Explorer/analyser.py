@@ -65,3 +65,16 @@ def get_time_domain_features(df:pd.DataFrame):
 
     return features
         
+def get_fft(df:pd.DataFrame,column:str,sampling_rate:int): # sampling_rate是采样率，一共记录多少个点，即多少Hz
+    signal=df[column].to_numpy() # 获得这一列数据，转为np计算
+    fft_result=np.fft.fft(signal) # 直接调用FTT
+    # FFT返回的是复数数组，模长代表振幅，平方为能量，相位。
+    amplitude=np.abs(fft_result) # 获得振幅，abs取模长
+    frequency=np.fft.fftfreq(len(signal),1/sampling_rate) # 获得频率，N，两点之间的时间间隔
+    positive_amplitude=amplitude[0:len(amplitude)//2+1]
+    positive_frequency=frequency[0:len(frequency)//2+1]
+    return {
+        "amplitude":positive_amplitude,
+        "frequency":positive_frequency
+    }
+
