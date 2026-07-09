@@ -13,3 +13,5 @@ REPORT_DIR=OUTPUT_DIR/'reports'
 DIRS=[PROJECT_ROOT,DATA_DIR,OUTPUT_DIR,FIGURE_DIR,REPORT_DIR]
 for path in DIRS:
     path.mkdir(parents=True,exist_ok=True)
+
+EEGLZ=DATA_DIR/'test_eeg.csv'
