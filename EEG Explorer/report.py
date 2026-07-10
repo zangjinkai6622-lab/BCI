@@ -1,7 +1,7 @@
 import config
 import pathlib
 import pandas as pd
-def generate_report(analysis_result:dict,filename:str):
+def generate_report(analysis_result:dict,visualization_result:dict,filename:str):
 
     with open(config.REPORT_DIR/filename,"w",encoding="utf-8") as file:
         file.write(f"# EEG Explorer Report\n")
@@ -18,11 +18,21 @@ def generate_report(analysis_result:dict,filename:str):
         time_feature_df=pd.DataFrame(analysis_result['time_features']).T # 行是通道，列是特征
         file.write(f"{time_feature_df.to_markdown()}")
         file.write("\n\n")
-
         file.write(f"## 6. Figures\n")
-        for name in analysis_result['figures']:
-            file.write(f"- ![](../figures/{name})\n")
-        
-        file.write(f"## 7. Interpretatio\n")
+        for name in visualization_result['time_domain_features']:
+            file.write(f"- ![](../figures/{name})\n")        
+        # 字典不能直接.to_markdown()，先转成df，再.to_markdown()
+        file.write(f"## 7. frequency-domain features\n")
+        fft_df=pd.DataFrame(analysis_result['fft'])
+        file.write(f"{fft_df.to_markdown()}")
+        file.write("\n\n")
+        psd_df=pd.DataFrame(analysis_result['psd'])
+        file.write(f"{psd_df.to_markdown()}")
+        file.write("\n\n")
+        file.write(f"## 8. Power Spectral Density\n")
+        for name in visualization_result['frequency_domain_features']:
+            file.write(f"- ![](../figures/{name})\n")    
+
+        file.write(f"## 9. Interpretatio\n")
         file.write(f"{analysis_result['interpretation']}\n")
-        file.write(f"## 8. Conclusion\n")
+        file.write(f"## 10. Conclusion\n")
