@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-
+import scipy.signal
 def get_dataset_info(df: pd.DataFrame):
     return {
         'rows':df.shape[0],
@@ -77,4 +77,15 @@ def get_fft(df:pd.DataFrame,column:str,sampling_rate:int): # sampling_rate是采
         "amplitude":positive_amplitude,
         "frequency":positive_frequency
     }
+
+
+# psd有归一化,单位频率上的功率，标准统一，便于比较
+def get_psd(df:pd.DataFrame,column:str,sampling_rate:int): # 功率谱密度
+    signal=df[column].to_numpy()
+    frequency,psd=scipy.signal.welch(signal,fs=sampling_rate)
+    return {
+        "frequency":frequency,
+        "psd":psd
+    }
+
 
