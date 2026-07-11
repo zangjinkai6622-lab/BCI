@@ -8,9 +8,14 @@ def main(path: str):
     df=reader.read_csv(path)
     if df is None:
         return
-    fft_result=analyser.get_fft(df,'Fp1',100)
-    psd_result=analyser.get_psd(df,'Fp1',100)
 
+    fft_result={}
+    psd_result={}
+    band_power_result={}
+    for channel in config.EEG_CHANNELS:
+        fft_result[channel]=analyser.get_fft(df,channel,config.SAMPLING_RATE)
+        psd_result[channel]=analyser.get_psd(df,channel,config.SAMPLING_RATE)
+        band_power_result[channel]=analyser.get_band_power(psd_result[channel],config.bands)
 
     analysis_result={
         'dataset':
@@ -25,18 +30,33 @@ def main(path: str):
         'time_features':analyser.get_time_domain_features(df),
         'fft':fft_result,
         'psd':psd_result,
+        'band_power':band_power_result
 
     }
+    
+    time_figures=[]
+    frequency_figures=[]
+
+    for channel in config.EEG_CHANNELS:        
+        time_figures.append(
+            visualization.plot_line(df,channel,f'{channel}_line1.png')
+        )
+        time_figures.append(
+            visualization.plot_histogram(df,channel,f'{channel}_hist1.png')
+        )
+        frequency_figures.append(
+            visualization.plot_fft(fft_result[channel],channel,f'{channel}_fft1.png')
+        )
+        frequency_figures.append(
+            visualization.plot_psd(psd_result[channel],channel,f'{channel}_psd1.png')
+        )
+        frequency_figures.append(
+            visualization.plot_band_power(band_power_result[channel],channel,f'{channel}_band_power.png')
+        )
 
     visualization_result={
-        'time_domain_features':[
-            visualization.plot_line(df,'Fp1','Fp1_line1.png'),
-            visualization.plot_histogram(df,'Fp1','Fp1_hist1.png'),
-        ],
-        'frequency_domain_features':[
-            visualization.plt_fft(fft_result,'Fp1','Fp1_fft1.png'),
-            visualization.plt_fft(psd_result,'Fp1','Fp1_psd1.png')
-        ]
+        'time_figures':time_figures,
+        'frequency_figures':frequency_figures
     }
 
     report.generate_report(analysis_result,visualization_result,'report.md')
