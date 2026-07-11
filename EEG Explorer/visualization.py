@@ -19,7 +19,7 @@ def plot_histogram(df:pd.DataFrame,column:str,filename:str):
     plt.title(column)
     plt.xlabel(column)
     plt.ylabel('frequency')
-    plt.hist(df[column])
+    plt.hist(df[column]) # 直方图，x连续
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(config.FIGURE_DIR/filename)
@@ -50,4 +50,14 @@ def plot_psd(psd_result:dict,column:str,filename:str):
     plt.close()
     return filename
 
+def plot_band_power(band_power_result:dict,column:str,filename:str):
+    plt.figure()
+    plt.title(column)
+    plt.xlabel('band')
+    plt.ylabel('power')
+    plt.bar(band_power_result.keys(),band_power_result.values()) # 柱状图，分散的数据
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(config.FIGURE_DIR/filename)
+    return filename
 
