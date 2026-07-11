@@ -88,4 +88,18 @@ def get_psd(df:pd.DataFrame,column:str,sampling_rate:int): # 功率谱密度
         "psd":psd
     }
 
+#  频带功率，对psd进行积分,在psd算法基础上进行
+def get_band_power(psd_result:dict,bands:dict):
+    result={}
+    frequency=psd_result['frequency']
+    psd=psd_result['psd']
+    for band,(low,high) in bands.items():
+        mask=(frequency>=low)&(frequency<=high) # 返回一个符合范围条件的TRUE FALSE的数组
+        power=np.trapezoid(psd[mask],frequency[mask])
+        result[band]=power
+        
+    return result
+
+
+
 
