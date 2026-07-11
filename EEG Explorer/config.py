@@ -15,3 +15,20 @@ for path in DIRS:
     path.mkdir(parents=True,exist_ok=True)
 
 EEGLZ=DATA_DIR/'test_eeg.csv'
+
+bands={
+"delta":(1,4),
+"theta":(4,8),
+"alpha":(8,13),
+"beta":(13,30),
+"gamma":(30,50)
+}
+
+EEG_CHANNELS=[
+    "Fp1",
+    # "Fp2",
+    # "C3",
+    # "C4"
+]
+
+SAMPLING_RATE=100
