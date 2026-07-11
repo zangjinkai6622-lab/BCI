@@ -17,10 +17,10 @@ def generate_report(analysis_result:dict,visualization_result:dict,filename:str)
         file.write(f"## 5. Time Domain Features\n")
         time_feature_df=pd.DataFrame(analysis_result['time_features']).T # 行是通道，列是特征
         file.write(f"{time_feature_df.to_markdown()}")
-        file.write("\n\n")
-        file.write(f"## 6. Figures\n")
-        for name in visualization_result['time_domain_features']:
-            file.write(f"- ![](../figures/{name})\n")        
+        file.write("\n\n")                
+        file.write(f"## 6.-Time-Figures\n")
+        for name in visualization_result['time_figures']:
+            file.write(f"- ![](../figures/{name})\n")             
         # 字典不能直接.to_markdown()，先转成df，再.to_markdown()
         file.write(f"## 7. frequency-domain features\n")
         fft_df=pd.DataFrame(analysis_result['fft'])
@@ -29,10 +29,13 @@ def generate_report(analysis_result:dict,visualization_result:dict,filename:str)
         psd_df=pd.DataFrame(analysis_result['psd'])
         file.write(f"{psd_df.to_markdown()}")
         file.write("\n\n")
-        file.write(f"## 8. Power Spectral Density\n")
-        for name in visualization_result['frequency_domain_features']:
+        file.write(f"## 8. Frequency domain figures\n")
+        for name in visualization_result['frequency_figures']:
             file.write(f"- ![](../figures/{name})\n")    
-
-        file.write(f"## 9. Interpretatio\n")
+        file.write(f"## 9. Band Power\n")
+        band_power_df=pd.DataFrame(analysis_result['band_power'])
+        file.write(f"{band_power_df.to_markdown()}")
+        file.write("\n\n")
+        file.write(f"## 10. Interpretatio\n")
         file.write(f"{analysis_result['interpretation']}\n")
-        file.write(f"## 10. Conclusion\n")
+        file.write(f"## 11. Conclusion\n")
