@@ -17,20 +17,34 @@ def main(path: str):
         psd_result[channel]=analyser.get_psd(df,channel,config.SAMPLING_RATE)
         band_power_result[channel]=analyser.get_band_power(psd_result[channel],config.bands)
 
+    hjorth_result={}
+    for channel in config.EEG_CHANNELS:
+        hjorth_result[channel]=analyser.get_hjorth(df,channel)
+
     analysis_result={
-        'dataset':
-            analyser.get_dataset_info(df),
-        'statistics':
-            analyser.get_statistics(df),
-        'missing_values':
-            analyser.get_missing_values(df),
-        'data_type':
-            analyser.get_data_type(df),
+        'basic':{
+            'dataset':
+                analyser.get_dataset_info(df),
+            'statistics':
+                analyser.get_statistics(df),
+            'missing_values':
+                analyser.get_missing_values(df),
+            'data_type':
+                analyser.get_data_type(df)
+        },
+        'features':{
+            'time_features':analyser.get_time_domain_features(df),
+            'band_power':band_power_result,
+            'hjorth':hjorth_result
+        },
+        'signals':{
+            'fft':fft_result,
+            'psd':psd_result
+        },
         'interpretation':[],
-        'time_features':analyser.get_time_domain_features(df),
-        'fft':fft_result,
-        'psd':psd_result,
-        'band_power':band_power_result
+
+
+        
 
     }
     
@@ -43,6 +57,9 @@ def main(path: str):
         )
         time_figures.append(
             visualization.plot_histogram(df,channel,f'{channel}_hist1.png')
+        )
+        time_figures.append(
+            visualization.plot_hjorth(hjorth_result[channel],channel,f'{channel}_hjorth_parameters.png')
         )
         frequency_figures.append(
             visualization.plot_fft(fft_result[channel],channel,f'{channel}_fft1.png')
