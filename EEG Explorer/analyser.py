@@ -100,6 +100,18 @@ def get_band_power(psd_result:dict,bands:dict):
         
     return result
 
+def get_hjorth(df:pd.DataFrame,column:str):
+    signal=df[column].to_numpy()
+    first_derivative=np.diff(signal)
+    second_derivative=np.diff(first_derivative)
+    activity=np.var(signal)
+    mobility=np.sqrt(np.var(first_derivative)/activity)
+    complexity=np.sqrt(np.var(second_derivative)/np.var(first_derivative))
+    return {
+        "Activity":activity,
+        "Mobility":mobility,
+        "Complexity":complexity
+    }
 
 
 
