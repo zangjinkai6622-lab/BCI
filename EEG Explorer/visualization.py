@@ -72,3 +72,15 @@ def plot_hjorth(hjorth_result:dict,column:str,filename:str):
     plt.savefig(config.FIGURE_DIR/filename)
     plt.close()
     return filename
+
+def plot_entropy(entropy_result:dict,column:str,filename:str):
+    plt.figure()
+    plt.title(f'Entropy - {column}')
+    plt.xlabel('Feature')
+    plt.ylabel('Entropy Value')
+    plt.bar(list(entropy_result.keys()),list(entropy_result.values()))
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(config.FIGURE_DIR/filename)
+    plt.close()
+    return filename
