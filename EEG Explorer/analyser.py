@@ -113,5 +113,14 @@ def get_hjorth(df:pd.DataFrame,column:str):
         "Complexity":complexity
     }
 
-
+def get_entropy(df:pd.DataFrame,column:str):
+    siganl=df[column].to_numpy()
+    hist,bins=np.histogram(siganl,bins=10,density=True)
+    #  数据是连续的，如果统计单个数据都是1/N的概率，没有意义，所以分段统计，返回的hist是一个bins里的数据数量或者概率，bins返回是段边界，
+    # density=True：概率归一化，即面积和为1 ，切此时hist对应概率；density=False：返回的是数量，此时hist对应数据数量
+    prob=hist[hist>0]  # 删除概率为0的概率
+    entropy=-np.sum(prob*np.log2(prob)) # 0-1范围的log是负数，所有要加-
+    return {
+        'entropy':entropy
+    }
 
