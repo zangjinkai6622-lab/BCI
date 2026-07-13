@@ -11,15 +11,17 @@ def main(path: str):
 
     fft_result={}
     psd_result={}
-    band_power_result={}
+    band_power_result={}    
+    hjorth_result={}
+    entropy_result={}
+
     for channel in config.EEG_CHANNELS:
         fft_result[channel]=analyser.get_fft(df,channel,config.SAMPLING_RATE)
         psd_result[channel]=analyser.get_psd(df,channel,config.SAMPLING_RATE)
         band_power_result[channel]=analyser.get_band_power(psd_result[channel],config.bands)
-
-    hjorth_result={}
-    for channel in config.EEG_CHANNELS:
         hjorth_result[channel]=analyser.get_hjorth(df,channel)
+        entropy_result[channel]=analyser.get_entropy(df,channel)
+        
 
     analysis_result={
         'basic':{
@@ -35,16 +37,16 @@ def main(path: str):
         'features':{
             'time_features':analyser.get_time_domain_features(df),
             'band_power':band_power_result,
-            'hjorth':hjorth_result
+            'hjorth':hjorth_result,
+            'entropy':entropy_result
+
         },
         'signals':{
             'fft':fft_result,
             'psd':psd_result
         },
-        'interpretation':[],
-
-
         
+        'interpretation':[],
 
     }
     
@@ -69,6 +71,9 @@ def main(path: str):
         )
         frequency_figures.append(
             visualization.plot_band_power(band_power_result[channel],channel,f'{channel}_band_power.png')
+        )
+        frequency_figures.append(
+            visualization.plot_entropy(entropy_result[channel],channel,f'{channel}_entropy.png')
         )
 
     visualization_result={
