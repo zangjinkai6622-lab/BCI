@@ -124,3 +124,46 @@ def get_entropy(df:pd.DataFrame,column:str):
         'entropy':entropy
     }
 
+
+def get_interpretation(band_power_result:dict,hjorth_result:dict,entropy_result:dict,column:str):
+    interpretation=[]
+
+    max_band=max(band_power_result,key=band_power_result.get)
+    interpretation.append(f"{max_band.capitalize()} band has the highest power.")
+
+    # entropy = entropy_result[column]['entropy']
+    entropy = entropy_result['entropy']
+
+    if entropy < 1:
+        interpretation.append("Signal complexity is low.")
+    elif entropy < 2:
+        interpretation.append("Signal complexity is moderate.")
+    else:
+        interpretation.append("Signal complexity is high.")
+
+    # if hjorth_result[column]['Mobility'] > 0.5:
+    #     interpretation.append("Signal changes rapidly.")
+    # else:
+    #     interpretation.append("Signal changes slowly.")
+
+    # if hjorth_result[column]['Complexity'] > 1.0:
+    #     interpretation.append("Signal waveform is more complex.")
+    # else:
+    #     interpretation.append("Signal waveform is relatively simple.")
+
+    
+    if hjorth_result['Mobility'] > 0.5:
+        interpretation.append("Signal changes rapidly.")
+    else:
+        interpretation.append("Signal changes slowly.")
+
+    if hjorth_result['Complexity'] > 1.0:
+        interpretation.append("Signal waveform is more complex.")
+    else:
+        interpretation.append("Signal waveform is relatively simple.")
+
+
+    return interpretation
+
+
+
