@@ -56,5 +56,9 @@ def generate_report(analysis_result:dict,visualization_result:dict,filename:str)
         file.write(f"{band_power_df.to_markdown()}")
         file.write("\n\n")
         file.write(f"## 12. Interpretatio\n")
-        file.write(f"{analysis_result['interpretation']}\n")
+        interpretation=analysis_result['interpretation']
+        for channel, texts in interpretation.items():
+            file.write(f"### {channel}\n")
+            for text in texts:
+                file.write(f"- {text}\n")
         file.write(f"## 13. Conclusion\n")
