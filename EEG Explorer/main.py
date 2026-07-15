@@ -21,7 +21,6 @@ def main():
         visualization_result,
         "report.md"
     )
-    
 def preprocess(df:pd.DataFrame):
     for channel in config.EEG_CHANNELS:
         df=preprocessing.apply_bandpass_filter(df,channel,config.LOWCUT,config.HIGHCUT,config.SAMPLING_RATE)
