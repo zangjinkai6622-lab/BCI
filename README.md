@@ -13,3 +13,19 @@ Planned Features
 - MNE support
 - Machine Learning
 - EEGNet
+
+# EEG Explorer
+
+## Introduction
+
+## Features
+
+## Project Structure
+
+## Installation
+
+## Usage
+
+## Results
+
+## Future Work
