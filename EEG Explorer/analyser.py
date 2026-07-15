@@ -131,7 +131,6 @@ def get_interpretation(band_power_result:dict,hjorth_result:dict,entropy_result:
     max_band=max(band_power_result,key=band_power_result.get)
     interpretation.append(f"{max_band.capitalize()} band has the highest power.")
 
-    # entropy = entropy_result[column]['entropy']
     entropy = entropy_result['entropy']
 
     if entropy < 1:
@@ -141,17 +140,6 @@ def get_interpretation(band_power_result:dict,hjorth_result:dict,entropy_result:
     else:
         interpretation.append("Signal complexity is high.")
 
-    # if hjorth_result[column]['Mobility'] > 0.5:
-    #     interpretation.append("Signal changes rapidly.")
-    # else:
-    #     interpretation.append("Signal changes slowly.")
-
-    # if hjorth_result[column]['Complexity'] > 1.0:
-    #     interpretation.append("Signal waveform is more complex.")
-    # else:
-    #     interpretation.append("Signal waveform is relatively simple.")
-
-    
     if hjorth_result['Mobility'] > 0.5:
         interpretation.append("Signal changes rapidly.")
     else:
