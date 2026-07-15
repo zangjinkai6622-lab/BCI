@@ -5,7 +5,7 @@ import report
 import numpy as np
 import config
 import pandas as pd
-
+import preprocessing
 def load_data(path: str):
     return reader.read_csv(path)
 def main():
@@ -13,6 +13,7 @@ def main():
     df = load_data(path)
     if df is None:
         return
+    df=preprocess(df)
     analysis_result = get_features(df)
     visualization_result = get_visualization(df, analysis_result)
     generate_report(
@@ -21,6 +22,10 @@ def main():
         "report.md"
     )
     
+def preprocess(df:pd.DataFrame):
+    for channel in config.EEG_CHANNELS:
+        df=preprocessing.apply_bandpass_filter(df,channel,config.LOWCUT,config.HIGHCUT,config.SAMPLING_RATE)
+    return df
 def generate_report(analysis_result:dict,visualization_result:dict,report_name:str):
     report.generate_report(analysis_result,visualization_result,report_name)
 
