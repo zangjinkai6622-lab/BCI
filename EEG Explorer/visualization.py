@@ -85,20 +85,30 @@ def plot_entropy(entropy_result:dict,column:str,filename:str):
     plt.close()
     return filename
 
-def plot_bandpass(raw_df:pd.DataFrame, filtered_df:pd.DataFrame, column:str, filename:str):
+def plot_bandpass(raw_df:pd.DataFrame, bandpass_df:pd.DataFrame, column:str, filename:str):
     plt.figure(figsize=(10,4))
-
     plt.plot(raw_df[column], label="Raw")
-    plt.plot(filtered_df[column], label="Filtered")
-
+    plt.plot(bandpass_df[column], label="Filtered")
     plt.title(f"Band-pass Filter - {column}")
     plt.xlabel("Sample")
     plt.ylabel("Amplitude")
     plt.legend()
-
     plt.grid(True)
     plt.tight_layout()
+    plt.savefig(config.FIGURE_DIR/filename)
+    plt.close()
+    return filename
 
+def plot_notch(bandpass_df:pd.DataFrame, notch_df:pd.DataFrame, column:str, filename:str):
+    plt.figure(figsize=(10,4))
+    plt.plot(bandpass_df[column], label="Raw")
+    plt.plot(notch_df[column], label="Filtered")
+    plt.title(f"Notch Filter - {column}")
+    plt.xlabel("Sample")
+    plt.ylabel("Amplitude")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
     plt.savefig(config.FIGURE_DIR/filename)
     plt.close()
     return filename
