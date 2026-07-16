@@ -10,21 +10,28 @@ def load_data(path: str):
     return reader.read_csv(path)
 def main():
     path = config.EEGLZ
-    df = load_data(path)
-    if df is None:
+    raw_df = load_data(path)
+    if raw_df is None:
         return
-    df=preprocess(df)
-    analysis_result = get_features(df)
-    visualization_result = get_visualization(df, analysis_result)
+    clean_df,preprocess_result=preprocess(raw_df)
+    analysis_result = get_features(clean_df)
+    visualization_result = get_visualization(preprocess_result, analysis_result)
     generate_report(
         analysis_result,
         visualization_result,
         "report.md"
     )
 def preprocess(df:pd.DataFrame):
+    preprocess_result={}
+    # 两次循环放在下一次循环将之前的覆盖，现在会保留raw，bandpass，notch结果
+    preprocess_result['raw']=df.copy()
     for channel in config.EEG_CHANNELS:
         df=preprocessing.apply_bandpass_filter(df,channel,config.LOWCUT,config.HIGHCUT,config.SAMPLING_RATE)
-    return df
+    preprocess_result['bandpass']=df.copy()
+    for channel in config.EEG_CHANNELS:
+        df=preprocessing.apply_notch_filter(df,channel,config.NOTCH_FREQ,config.SAMPLING_RATE)
+    preprocess_result['notch']=df.copy()
+    return df,preprocess_result
 def generate_report(analysis_result:dict,visualization_result:dict,report_name:str):
     report.generate_report(analysis_result,visualization_result,report_name)
 
@@ -73,37 +80,57 @@ def get_features(df:pd.DataFrame):
     }
     return analysis_result
 
-def get_visualization(df:pd.DataFrame,analysis_result:dict):
-    time_figures=[]
-    frequency_figures=[]
+def get_visualization(preprocess_result:dict,analysis_result:dict):
+    visualization_result={
+        'preprocess_figures':{
+            'bandpass':[],
+            'notch':[]
+            
+        },
+        'time_figures':{
+            'line':[],
+            'hist':[],
+            'hjorth':[]
+        },
+        'frequency_figures':{
+            'fft':[],
+            'psd':[],
+            'band_power':[],
+            'entropy':[]
+            
+        }
+    }
 
     for channel in config.EEG_CHANNELS:        
-        time_figures.append(
-            visualization.plot_line(df,channel,f'{channel}_line1.png')
+        visualization_result['time_figures']['line'].append(
+            visualization.plot_line(preprocess_result['notch'],channel,f'{channel}_line1.png')
         )
-        time_figures.append(
-            visualization.plot_histogram(df,channel,f'{channel}_hist1.png')
+        visualization_result['time_figures']['hist'].append(
+            visualization.plot_histogram(preprocess_result['notch'],channel,f'{channel}_hist1.png')
         )
-        time_figures.append(
+        visualization_result['time_figures']['hjorth'].append(
             visualization.plot_hjorth(analysis_result['features']['hjorth'][channel],channel,f'{channel}_hjorth_parameters.png')
         )
-        frequency_figures.append(
+        visualization_result['frequency_figures']['fft'].append(
             visualization.plot_fft(analysis_result['signals']['fft'][channel],channel,f'{channel}_fft1.png')
         )
-        frequency_figures.append(
+        visualization_result['frequency_figures']['psd'].append(
             visualization.plot_psd(analysis_result['signals']['psd'][channel],channel,f'{channel}_psd1.png')
         )
-        frequency_figures.append(
+        visualization_result['frequency_figures']['band_power'].append(
             visualization.plot_band_power(analysis_result['features']['band_power'][channel],channel,f'{channel}_band_power.png')
         )
-        frequency_figures.append(
+        visualization_result['frequency_figures']['entropy'].append(
             visualization.plot_entropy(analysis_result['features']['entropy'][channel],channel,f'{channel}_entropy.png')
         )
+        visualization_result['preprocess_figures']['bandpass'].append(
+            visualization.plot_bandpass(preprocess_result['raw'],preprocess_result['bandpass'],channel,f'{channel}_bandpass.png')
+        )
+        visualization_result['preprocess_figures']['notch'].append(
+            visualization.plot_notch(preprocess_result['bandpass'],preprocess_result['notch'],channel,f'{channel}_notch.png')
+        )
 
-    visualization_result={
-        'time_figures':time_figures,
-        'frequency_figures':frequency_figures
-    }
+
     return visualization_result
 
 
