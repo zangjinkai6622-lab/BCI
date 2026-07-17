@@ -39,3 +39,5 @@ HIGHCUT=40
 
 NOTCH_FREQ=50
 NOTCH_Q=30
+
+window_size=1000
