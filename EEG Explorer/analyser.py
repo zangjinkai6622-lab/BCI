@@ -51,6 +51,10 @@ def get_zero_crossing_rate(df:pd.DataFrame,column:str):
 
 def get_time_domain_features(df:pd.DataFrame):
     numerical_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    numerical_columns = [
+        col for col in numerical_columns
+        if col != "time"
+    ]
     features={}
     for column in numerical_columns:
         channel_feature={
