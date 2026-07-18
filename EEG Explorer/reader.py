@@ -1,4 +1,5 @@
 import pandas as pd
+import mne
 """
 Read csv file.
 
@@ -25,4 +26,21 @@ def read_csv(path: str):
     except UnicodeDecodeError:
         print("Error: encoding error.")
         return None
+    return df
+
+def read_edf(path: str):
+    try:
+        raw=mne.io.read_raw_edf(path,preload=True,encoding='utf-8')
+    except FileNotFoundError:
+        print("Error: file not found.")
+        return None
+
+    except pd.errors.EmptyDataError:
+        print("Error: empty file.")
+        return None
+
+    except UnicodeDecodeError:
+        print("Error: encoding error.")
+        return None
+    df=raw.to_data_frame()
     return df
