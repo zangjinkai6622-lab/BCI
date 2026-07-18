@@ -11,19 +11,25 @@ def split_windows(df:pd.DataFrame):
         windows.append(window)
     return windows
 
-def creat_feature_dataframe(windows:list):
+def create_feature_dataframe(windows:list,channels:list):
     features=[]
     for window in windows:
         # 一行就是一个样本特征即一次循环
         sample={}
-        for channel in config.EEG_CHANNELS:
-            # 时域
-            feature=analyser.get_time_domain_features(window[channel])
+        time_features=analyser.get_time_domain_features(window)
+        # 时域，放在循环外面是如果多通道会循环调用get_time_domain_features，增大计算量
+        # window是df传入get_time_domain_features得到的是两层字典：各个通道，通道对应的特征值，需要两层循环，第一层先取通道和特征值字典，再循环取出特征值名称和值
+        for ch,feature in time_features.items():
             for key,value in feature.items():
-                sample[f'{channel}_time_domain_{key}']=value
+                sample[f'{ch}_time_domain_{key}']=value
+        
+        for channel in channels:
             # FFT
             fft_result=analyser.get_fft(window,channel,config.SAMPLING_RATE)
-            peak_freq=fft_result['frequency'][np.argmax(fft_result['amplitude'])]
+            freq=fft_result['frequency']
+            amp=fft_result['amplitude']
+            mask=(freq>=1)&(freq<=40)
+            peak_freq=freq[mask][np.argmax(amp[mask])]
             sample[f'{channel}_peak_frequency']=peak_freq
             # bandpower
             psd_result=analyser.get_psd(window,channel,config.SAMPLING_RATE)
@@ -35,10 +41,14 @@ def creat_feature_dataframe(windows:list):
             for key,value in hjorth.items():
                 sample[f'{channel}_hjorth_{key}']=value
             # entropy
-            sample[f'{channel}_entropy']=analyser.get_entropy(window,channel)
-        # 一个窗口结束，下一行
+            entropy=analyser.get_entropy(window,channel)
+            for key,value in entropy.items():
+                sample[f'{channel}_entropy_{key}']=value
+            # 一个窗口结束，下一行
         features.append(sample)
-    return pd.DataFrame(features)
+        feature_df = pd.DataFrame(features)
+        feature_df = feature_df.astype(float)
+        return feature_df
 
             
             
