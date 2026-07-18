@@ -11,6 +11,7 @@ def split_windows(df:pd.DataFrame):
         windows.append(window)
     return windows
 
+
 def create_feature_dataframe(windows:list,channels:list):
     features=[]
     for window in windows:
