@@ -18,7 +18,7 @@ def create_feature_dataframe(windows:list,channels:list):
         # 一行就是一个样本特征即一次循环
         sample={}
         time_features=analyser.get_time_domain_features(window)
-        # 时域，放在循环外面是如果多通道会循环调用get_time_domain_features，增大计算量
+        # 时域，放在循环外面是如果多通道会循环调用get_time_domain_features，会增大计算量
         # window是df传入get_time_domain_features得到的是两层字典：各个通道，通道对应的特征值，需要两层循环，第一层先取通道和特征值字典，再循环取出特征值名称和值
         for ch,feature in time_features.items():
             for key,value in feature.items():
