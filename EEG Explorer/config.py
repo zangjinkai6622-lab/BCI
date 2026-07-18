@@ -24,12 +24,7 @@ bands={
 "gamma":(30,50)
 }
 
-EEG_CHANNELS=[
-    "Fp1",
-    # "Fp2",
-    # "C3",
-    # "C4"
-]
+
 
 SAMPLING_RATE=100
 
@@ -40,4 +35,4 @@ HIGHCUT=40
 NOTCH_FREQ=50
 NOTCH_Q=30
 
-window_size=1000
+window_size=1600
