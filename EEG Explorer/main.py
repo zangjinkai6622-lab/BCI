@@ -6,36 +6,45 @@ import numpy as np
 import config
 import pandas as pd
 import preprocessing
+import feature
+import channel
 def load_data(path: str):
-    return reader.read_csv(path)
+    return reader.read_edf(path)
 def main():
-    path = config.EEGLZ
-    raw_df = load_data(path)
+    # raw->preprocess->get_features / windows(两个分支)
+    raw_df = load_data(r'EEG Explorer\data\S001R01.edf')
     if raw_df is None:
         return
-    clean_df,preprocess_result=preprocess(raw_df)
-    analysis_result = get_features(clean_df)
-    visualization_result = get_visualization(preprocess_result, analysis_result)
+    raw_df = channel.normalize_channel_names(raw_df)
+    channels=channel.get_available_channels(raw_df)
+    clean_df,preprocess_result=preprocess(raw_df,channels)
+    analysis_result = get_features(clean_df,channels)
+    windows=feature.split_windows(clean_df)
+    feature_df=feature.create_feature_dataframe(windows,channels)
+    print(feature_df.shape)
+    print(feature_df.head())
+    print(feature_df.dtypes.value_counts())
+    visualization_result = get_visualization(preprocess_result, analysis_result,channels)
     generate_report(
         analysis_result,
         visualization_result,
         "report.md"
     )
-def preprocess(df:pd.DataFrame):
+def preprocess(df:pd.DataFrame,channels:list):
     preprocess_result={}
     # 两次循环放在下一次循环将之前的覆盖，现在会保留raw，bandpass，notch结果
     preprocess_result['raw']=df.copy()
-    for channel in config.EEG_CHANNELS:
+    for channel in channels:
         df=preprocessing.apply_bandpass_filter(df,channel,config.LOWCUT,config.HIGHCUT,config.SAMPLING_RATE)
     preprocess_result['bandpass']=df.copy()
-    for channel in config.EEG_CHANNELS:
+    for channel in channels:
         df=preprocessing.apply_notch_filter(df,channel,config.NOTCH_FREQ,config.SAMPLING_RATE)
     preprocess_result['notch']=df.copy()
     return df,preprocess_result
 def generate_report(analysis_result:dict,visualization_result:dict,report_name:str):
     report.generate_report(analysis_result,visualization_result,report_name)
 
-def get_features(df:pd.DataFrame):
+def get_features(df:pd.DataFrame,channels:list):
     fft_result={}
     psd_result={}
     band_power_result={}    
@@ -43,7 +52,7 @@ def get_features(df:pd.DataFrame):
     entropy_result={}
     interpretation_result={}
 
-    for channel in config.EEG_CHANNELS:
+    for channel in channels:
         fft_result[channel]=analyser.get_fft(df,channel,config.SAMPLING_RATE)
         psd_result[channel]=analyser.get_psd(df,channel,config.SAMPLING_RATE)
         band_power_result[channel]=analyser.get_band_power(psd_result[channel],config.bands)
@@ -80,7 +89,7 @@ def get_features(df:pd.DataFrame):
     }
     return analysis_result
 
-def get_visualization(preprocess_result:dict,analysis_result:dict):
+def get_visualization(preprocess_result:dict,analysis_result:dict,channels:list):
     visualization_result={
         'preprocess_figures':{
             'bandpass':[],
@@ -101,7 +110,7 @@ def get_visualization(preprocess_result:dict,analysis_result:dict):
         }
     }
 
-    for channel in config.EEG_CHANNELS:        
+    for channel in channels:        
         visualization_result['time_figures']['line'].append(
             visualization.plot_line(preprocess_result['notch'],channel,f'{channel}_line1.png')
         )
