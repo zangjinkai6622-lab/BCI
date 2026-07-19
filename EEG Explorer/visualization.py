@@ -59,6 +59,7 @@ def plot_band_power(band_power_result:dict,column:str,filename:str):
     plt.grid(True)
     plt.tight_layout()
     plt.savefig(config.FIGURE_DIR/filename)
+    plt.close()
     return filename
 
 def plot_hjorth(hjorth_result:dict,column:str,filename:str):
