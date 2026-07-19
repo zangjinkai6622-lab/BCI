@@ -8,23 +8,23 @@ import pandas as pd
 import preprocessing
 import feature
 import channel
+import data_pipeline
+import glob
 def load_data(path: str):
     return reader.read_edf(path)
 def main():
-    # raw->preprocess->get_features / windows(两个分支)
-    raw_df = load_data(r'EEG Explorer\data\S001R01.edf')
-    if raw_df is None:
-        return
-    raw_df = channel.normalize_channel_names(raw_df)
-    channels=channel.get_available_channels(raw_df)
-    clean_df,preprocess_result=preprocess(raw_df,channels)
-    analysis_result = get_features(clean_df,channels)
-    windows=feature.split_windows(clean_df)
-    feature_df=feature.create_feature_dataframe(windows,channels)
-    print(feature_df.shape)
-    print(feature_df.head())
-    print(feature_df.dtypes.value_counts())
-    visualization_result = get_visualization(preprocess_result, analysis_result,channels)
+    files=glob.glob('EEG Explorer/data/*.edf')
+    features_list=[]
+    report_results=[]
+    for file in files:
+        result = data_pipeline.process_one_file(file)
+        if result is None:
+            continue
+        feature_df, preprocess_result, analysis_result, visualization_result = result
+        features_list.append(feature_df)
+    report_results.append((analysis_result,visualization_result))
+    dataset=pd.concat(features_list,axis=0,ignore_index=True) # 行拼接
+    analysis_result, visualization_result = report_results[-1]
     generate_report(
         analysis_result,
         visualization_result,
