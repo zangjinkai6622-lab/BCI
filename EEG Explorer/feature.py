@@ -49,7 +49,7 @@ def create_feature_dataframe(windows:list,channels:list):
         features.append(sample)
         feature_df = pd.DataFrame(features)
         feature_df = feature_df.astype(float)
-        return feature_df
+    return feature_df
 
             
             
