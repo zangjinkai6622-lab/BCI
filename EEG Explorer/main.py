@@ -6,10 +6,10 @@ import numpy as np
 import config
 import pandas as pd
 import preprocessing
-import feature
-import channel
+import machine_learning
 import data_pipeline
 import glob
+import label
 def load_data(path: str):
     return reader.read_edf(path)
 def main():
@@ -21,9 +21,21 @@ def main():
         if result is None:
             continue
         feature_df, preprocess_result, analysis_result, visualization_result = result
+        label_=label.get_label(file)
+        feature_df['label']=label_
         features_list.append(feature_df)
-    report_results.append((analysis_result,visualization_result))
+        report_results.append((analysis_result,visualization_result))
     dataset=pd.concat(features_list,axis=0,ignore_index=True) # 行拼接
+    print(dataset["label"].value_counts())
+    X,y=machine_learning.split_xy(dataset)
+    X_train,X_test,y_train,y_test=machine_learning.split_dataset(X,y)
+    X_train,X_test,scaler=machine_learning.standardize(X_train,X_test)
+    model=machine_learning.train_svm(X_train,y_train)
+    y_pred=machine_learning.predict(model,X_test)
+    accuracy,matrix=machine_learning.evaluate_model(y_test,y_pred)
+    print(dataset.shape)
+    print('accuracy:',accuracy)
+    print('matrix',matrix)
     analysis_result, visualization_result = report_results[-1]
     generate_report(
         analysis_result,
