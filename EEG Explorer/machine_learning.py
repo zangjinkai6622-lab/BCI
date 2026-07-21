@@ -4,6 +4,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import confusion_matrix
+from sklearn.decomposition import PCA
+from sklearn.metrics import classification_report
+import joblib
 
 # 流程： 分离dataset的X，y ---> 分别对X,y分出train、test，随机种子42，分层提取，---> 标准化 ---> 训练模型 ---> 预测，根据X_train预测y_pred ---> 评价，根据y_pred和y_test进行准确性和混淆矩阵的评价
 def split_xy(dataset:pd.DataFrame):
@@ -25,11 +28,21 @@ def standardize(X_train:pd.DataFrame,X_test:pd.DataFrame):
     scaler=StandardScaler()
     X_train=scaler.fit_transform(X_train)
     X_test=scaler.transform(X_test)
+    joblib.dump(scaler,'scaler.pkl')
     return X_train,X_test,scaler
+
+# 目前数据样本远小于维数，所以需要降维，用pca去降维，将多个重复的列 进行合并
+def apply_pca(X_train:pd.DataFrame,X_test:pd.DataFrame):
+    pca=PCA(n_components=0.95) # 保存95%的信息
+    X_train=pca.fit_transform(X_train) #  先计mean，var这些在转化降维
+    X_test=pca.transform(X_test) # 直接降维，预测阶段不能fit，防止数据泄露：测试集的信息，在训练过程中提前泄漏给模型了。
+    joblib.dump(pca,'pca.pkl')
+    return X_train,X_test,pca
 
 def train_svm(X_train:pd.DataFrame,y_train:pd.DataFrame):
     model=SVC(kernel='rbf')
     model.fit(X_train,y_train)
+    joblib.dump(model,'model.pkl')
     return model
 
 def predict(model,X_test:pd.DataFrame):
@@ -39,5 +52,10 @@ def predict(model,X_test:pd.DataFrame):
 def evaluate_model(y_test:pd.DataFrame,y_pred:pd.DataFrame):
     accuracy=accuracy_score(y_test,y_pred)
     matrix=confusion_matrix(y_test,y_pred) #混淆矩阵
-    return accuracy,matrix
-
+    report=classification_report(y_test,y_pred)
+    return accuracy,matrix,report
+def load_model():
+    model=joblib.load('model.pkl')
+    scaler=joblib.load('scaler.pkl')
+    pca=joblib.load('pca.pkl')
+    return model,scaler,pca
