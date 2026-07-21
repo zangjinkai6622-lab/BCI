@@ -59,3 +59,14 @@ def load_model():
     scaler=joblib.load('scaler.pkl')
     pca=joblib.load('pca.pkl')
     return model,scaler,pca
+
+def feature_transform(feature_df:pd.DataFrame,scaler:StandardScaler,pca:PCA):
+    feature=scaler.transform(feature_df)
+    feature=pca.transform(feature)
+    return feature
+
+def predict_one_sample(feature_df:pd.DataFrame):
+    model,scaler,pca=load_model()
+    feature=feature_transform(feature_df,scaler,pca)
+    prediction=model.predict(feature)
+    return prediction
