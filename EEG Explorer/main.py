@@ -1,162 +1,35 @@
-import reader  
-import analyser 
-import visualization 
-import report 
 import numpy as np
-import config
 import pandas as pd
-import preprocessing
+import inference
 import machine_learning
 import data_pipeline
 import glob
 import label
-def load_data(path: str):
-    return reader.read_edf(path)
-def main():
+
+def train_main():
     files=glob.glob('EEG Explorer/data/*.edf')
     features_list=[]
-    report_results=[]
+
     for file in files:
         result = data_pipeline.process_one_file(file)
-        if result is None:
-            continue
         feature_df, preprocess_result, analysis_result, visualization_result = result
-        label_=label.get_label(file)
-        feature_df['label']=label_
+        feature_df = result[0]
+        feature_df['label']=label.get_label(file)
         features_list.append(feature_df)
-        report_results.append((analysis_result,visualization_result))
     dataset=pd.concat(features_list,axis=0,ignore_index=True) # 行拼接
-    print(dataset["label"].value_counts())
-    X,y=machine_learning.split_xy(dataset)
-    X_train,X_test,y_train,y_test=machine_learning.split_dataset(X,y)
-    X_train,X_test,scaler=machine_learning.standardize(X_train,X_test)
-    model=machine_learning.train_svm(X_train,y_train)
-    y_pred=machine_learning.predict(model,X_test)
-    accuracy,matrix=machine_learning.evaluate_model(y_test,y_pred)
-    print(dataset.shape)
-    print('accuracy:',accuracy)
-    print('matrix',matrix)
-    analysis_result, visualization_result = report_results[-1]
-    generate_report(
-        analysis_result,
-        visualization_result,
-        "report.md"
-    )
-def preprocess(df:pd.DataFrame,channels:list):
-    preprocess_result={}
-    # 两次循环放在下一次循环将之前的覆盖，现在会保留raw，bandpass，notch结果
-    preprocess_result['raw']=df.copy()
-    for channel in channels:
-        df=preprocessing.apply_bandpass_filter(df,channel,config.LOWCUT,config.HIGHCUT,config.SAMPLING_RATE)
-    preprocess_result['bandpass']=df.copy()
-    for channel in channels:
-        df=preprocessing.apply_notch_filter(df,channel,config.NOTCH_FREQ,config.SAMPLING_RATE)
-    preprocess_result['notch']=df.copy()
-    return df,preprocess_result
-def generate_report(analysis_result:dict,visualization_result:dict,report_name:str):
-    report.generate_report(analysis_result,visualization_result,report_name)
+    model,scaler,pca=machine_learning.train_pipeline(dataset,'svm_v1')
 
-def get_features(df:pd.DataFrame,channels:list):
-    fft_result={}
-    psd_result={}
-    band_power_result={}    
-    hjorth_result={}
-    entropy_result={}
-    interpretation_result={}
+def inference_main():
+    file='EEG Explorer/data/test.edf'
+    result=inference.predict_file(file)
+    return result
 
-    for channel in channels:
-        fft_result[channel]=analyser.get_fft(df,channel,config.SAMPLING_RATE)
-        psd_result[channel]=analyser.get_psd(df,channel,config.SAMPLING_RATE)
-        band_power_result[channel]=analyser.get_band_power(psd_result[channel],config.bands)
-        hjorth_result[channel]=analyser.get_hjorth(df,channel)
-        entropy_result[channel]=analyser.get_entropy(df,channel)
-        interpretation_result[channel]=analyser.get_interpretation(band_power_result[channel],hjorth_result[channel],entropy_result[channel],channel)
-        
-
-    analysis_result={
-        'basic':{
-            'dataset':
-                analyser.get_dataset_info(df),
-            'statistics':
-                analyser.get_statistics(df),
-            'missing_values':
-                analyser.get_missing_values(df),
-            'data_type':
-                analyser.get_data_type(df)
-        },
-        'features':{
-            'time_features':analyser.get_time_domain_features(df),
-            'band_power':band_power_result,
-            'hjorth':hjorth_result,
-            'entropy':entropy_result
-
-        },
-        'signals':{
-            'fft':fft_result,
-            'psd':psd_result
-        },
-        
-        'interpretation': interpretation_result
-
-    }
-    return analysis_result
-
-def get_visualization(preprocess_result:dict,analysis_result:dict,channels:list):
-    visualization_result={
-        'preprocess_figures':{
-            'bandpass':[],
-            'notch':[]
-            
-        },
-        'time_figures':{
-            'line':[],
-            'hist':[],
-            'hjorth':[]
-        },
-        'frequency_figures':{
-            'fft':[],
-            'psd':[],
-            'band_power':[],
-            'entropy':[]
-            
-        }
-    }
-
-    for channel in channels:        
-        visualization_result['time_figures']['line'].append(
-            visualization.plot_line(preprocess_result['notch'],channel,f'{channel}_line1.png')
-        )
-        visualization_result['time_figures']['hist'].append(
-            visualization.plot_histogram(preprocess_result['notch'],channel,f'{channel}_hist1.png')
-        )
-        visualization_result['time_figures']['hjorth'].append(
-            visualization.plot_hjorth(analysis_result['features']['hjorth'][channel],channel,f'{channel}_hjorth_parameters.png')
-        )
-        visualization_result['frequency_figures']['fft'].append(
-            visualization.plot_fft(analysis_result['signals']['fft'][channel],channel,f'{channel}_fft1.png')
-        )
-        visualization_result['frequency_figures']['psd'].append(
-            visualization.plot_psd(analysis_result['signals']['psd'][channel],channel,f'{channel}_psd1.png')
-        )
-        visualization_result['frequency_figures']['band_power'].append(
-            visualization.plot_band_power(analysis_result['features']['band_power'][channel],channel,f'{channel}_band_power.png')
-        )
-        visualization_result['frequency_figures']['entropy'].append(
-            visualization.plot_entropy(analysis_result['features']['entropy'][channel],channel,f'{channel}_entropy.png')
-        )
-        visualization_result['preprocess_figures']['bandpass'].append(
-            visualization.plot_bandpass(preprocess_result['raw'],preprocess_result['bandpass'],channel,f'{channel}_bandpass.png')
-        )
-        visualization_result['preprocess_figures']['notch'].append(
-            visualization.plot_notch(preprocess_result['bandpass'],preprocess_result['notch'],channel,f'{channel}_notch.png')
-        )
-
-
-    return visualization_result
 
 
 if __name__ == '__main__':
-    # path='https://raw.githubusercontent.com/datasciencedojo/datasets/master/titanic.csv'
-    main()
-
-
+    mode=input("train or predict:")
+    if mode=="train":
+        train_main()
+    elif mode=="predict":
+        result=inference.predict_file("EEG Explorer/data/test.edf")
+        print(result)
