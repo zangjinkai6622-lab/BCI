@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import scipy.signal
+import config
 def get_dataset_info(df: pd.DataFrame):
     return {
         'rows':df.shape[0],
@@ -159,3 +160,47 @@ def get_interpretation(band_power_result:dict,hjorth_result:dict,entropy_result:
 
 
 
+def get_features(df:pd.DataFrame,channels:list):
+    fft_result={}
+    psd_result={}
+    band_power_result={}    
+    hjorth_result={}
+    entropy_result={}
+    interpretation_result={}
+
+    for channel in channels:
+        fft_result[channel]=get_fft(df,channel,config.SAMPLING_RATE)
+        psd_result[channel]=get_psd(df,channel,config.SAMPLING_RATE)
+        band_power_result[channel]=get_band_power(psd_result[channel],config.bands)
+        hjorth_result[channel]=get_hjorth(df,channel)
+        entropy_result[channel]=get_entropy(df,channel)
+        interpretation_result[channel]=get_interpretation(band_power_result[channel],hjorth_result[channel],entropy_result[channel],channel)
+        
+
+    analysis_result={
+        'basic':{
+            'dataset':
+                get_dataset_info(df),
+            'statistics':
+                get_statistics(df),
+            'missing_values':
+                get_missing_values(df),
+            'data_type':
+                get_data_type(df)
+        },
+        'features':{
+            'time_features':get_time_domain_features(df),
+            'band_power':band_power_result,
+            'hjorth':hjorth_result,
+            'entropy':entropy_result
+
+        },
+        'signals':{
+            'fft':fft_result,
+            'psd':psd_result
+        },
+        
+        'interpretation': interpretation_result
+
+    }
+    return analysis_result
