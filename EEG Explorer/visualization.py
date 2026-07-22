@@ -113,3 +113,56 @@ def plot_notch(bandpass_df:pd.DataFrame, notch_df:pd.DataFrame, column:str, file
     plt.savefig(config.FIGURE_DIR/filename)
     plt.close()
     return filename
+
+def get_visualization(preprocess_result:dict,analysis_result:dict,channels:list):
+    visualization_result={
+        'preprocess_figures':{
+            'bandpass':[],
+            'notch':[]
+            
+        },
+        'time_figures':{
+            'line':[],
+            'hist':[],
+            'hjorth':[]
+        },
+        'frequency_figures':{
+            'fft':[],
+            'psd':[],
+            'band_power':[],
+            'entropy':[]
+            
+        }
+    }
+
+    for channel in channels:        
+        visualization_result['time_figures']['line'].append(
+            plot_line(preprocess_result['notch'],channel,f'{channel}_line1.png')
+        )
+        visualization_result['time_figures']['hist'].append(
+            plot_histogram(preprocess_result['notch'],channel,f'{channel}_hist1.png')
+        )
+        visualization_result['time_figures']['hjorth'].append(
+            plot_hjorth(analysis_result['features']['hjorth'][channel],channel,f'{channel}_hjorth_parameters.png')
+        )
+        visualization_result['frequency_figures']['fft'].append(
+            plot_fft(analysis_result['signals']['fft'][channel],channel,f'{channel}_fft1.png')
+        )
+        visualization_result['frequency_figures']['psd'].append(
+            plot_psd(analysis_result['signals']['psd'][channel],channel,f'{channel}_psd1.png')
+        )
+        visualization_result['frequency_figures']['band_power'].append(
+            plot_band_power(analysis_result['features']['band_power'][channel],channel,f'{channel}_band_power.png')
+        )
+        visualization_result['frequency_figures']['entropy'].append(
+            plot_entropy(analysis_result['features']['entropy'][channel],channel,f'{channel}_entropy.png')
+        )
+        visualization_result['preprocess_figures']['bandpass'].append(
+            plot_bandpass(preprocess_result['raw'],preprocess_result['bandpass'],channel,f'{channel}_bandpass.png')
+        )
+        visualization_result['preprocess_figures']['notch'].append(
+            plot_notch(preprocess_result['bandpass'],preprocess_result['notch'],channel,f'{channel}_notch.png')
+        )
+
+
+    return visualization_result
