@@ -20,7 +20,7 @@ def train_main():
     model,scaler,pca=machine_learning.train_pipeline(dataset,'svm_v1')
 
 def inference_main():
-    file='EEG Explorer/data/test.edf'
+    file='EEG Explorer/data/S001R00.edf'
     result=inference.predict_file(file)
     return result
 
@@ -31,5 +31,5 @@ if __name__ == '__main__':
     if mode=="train":
         train_main()
     elif mode=="predict":
-        result=inference.predict_file("EEG Explorer/data/test.edf")
+        result=inference.predict_file("EEG Explorer/data/S001R003.edf")
         print(result)

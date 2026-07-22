@@ -53,10 +53,11 @@ def evaluate_model(y_test:pd.DataFrame,y_pred:pd.DataFrame):
     report=classification_report(y_test,y_pred)
     return accuracy,matrix,report
 def load_model(model_name:str):
-    path=f"models/{model_name}"
-    model=joblib.load(f"{path}/model.pkl")
-    scaler=joblib.load(f"{path}/scaler.pkl")
-    pca=joblib.load(f"{path}/pca.pkl")
+    current_dir = pathlib.Path(__file__).parent
+    path = str(current_dir / "models" / model_name)
+    model = joblib.load(f"{path}/model.pkl")
+    scaler = joblib.load(f"{path}/scaler.pkl")
+    pca = joblib.load(f"{path}/pca.pkl")
     return model,scaler,pca
 
 def feature_transform(feature_df:pd.DataFrame,scaler:StandardScaler,pca:PCA):
