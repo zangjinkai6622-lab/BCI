@@ -25,3 +25,15 @@ def apply_notch_filter(df:pd.DataFrame,column:str,notch_freq:int,sampling_rate:i
     filtered_df=df.copy()
     filtered_df[column]=filtered_signal
     return filtered_df
+
+def preprocess(df:pd.DataFrame,channels:list):
+    preprocess_result={}
+    # 两次循环放在下一次循环将之前的覆盖，现在会保留raw，bandpass，notch结果
+    preprocess_result['raw']=df.copy()
+    for channel in channels:
+        df=apply_bandpass_filter(df,channel,config.LOWCUT,config.HIGHCUT,config.SAMPLING_RATE)
+    preprocess_result['bandpass']=df.copy()
+    for channel in channels:
+        df=apply_notch_filter(df,channel,config.NOTCH_FREQ,config.SAMPLING_RATE)
+    preprocess_result['notch']=df.copy()
+    return df,preprocess_result
