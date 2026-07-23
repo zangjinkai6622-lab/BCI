@@ -29,7 +29,7 @@ def extract_feature(file_path:str):
         return
     raw_df = channel.normalize_channel_names(raw_df)
     channels=channel.get_available_channels(raw_df)
-    clean_df,_=main.preprocess(raw_df,channels)
+    clean_df,_=preprocessing.preprocess(raw_df,channels)
     windows=feature.split_windows(clean_df)
     feature_df=feature.create_feature_dataframe(windows,channels)
     return feature_df
