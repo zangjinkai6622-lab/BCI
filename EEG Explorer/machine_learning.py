@@ -13,6 +13,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV
+import config
 
 
 # 流程： 分离dataset的X，y ---> 分别对X,y分出train、test，随机种子42，分层提取，---> 标准化 ---> 训练模型 ---> 预测，根据X_train预测y_pred ---> 评价，根据y_pred和y_test进行准确性和混淆矩阵的评价
@@ -40,7 +41,7 @@ def build_pipeline(model):
 #  网格搜索参数是为了找到最合适的参数，先判断模型合不合适，再找出最好的参数，GridSearchCV内部就是CrossValidation，每个参数都试一下，找到最合适的参数
 def grid_search_cv(pipeline:Pipeline,X_train:pd.DataFrame,y_train:pd.Series,model_type:str):
     param_grid = get_param_grid(model_type)
-    grid=GridSearchCV(estimator=pipeline,param_grid=param_grid,cv=5,scoring='accuracy',n_jobs=-1)
+    grid=GridSearchCV(estimator=pipeline,param_grid=param_grid,cv=5,scoring='accuracy',n_jobs=1)# jobs=-1调用所有进程，但是temp有中文名，所以不能用temp，改为1
     grid.fit(X_train,y_train)
     return (
         grid.best_estimator_,
@@ -56,18 +57,15 @@ def evaluate_model(y_test:pd.DataFrame,y_pred:np.ndarray):
 
 
 def save_model(model,model_name:str):
-    current_dir = pathlib.Path(__file__).parent  # data_pipeline.py 所在目录
-    model_dir = current_dir / "models" / model_name
+    model_dir = config.MODEL_DIR/ model_name
     model_dir.mkdir(parents=True, exist_ok=True)
-    joblib.dump(model,model_dir / f"{model_name}.pkl")
+    joblib.dump(model, model_dir / "model.pkl")
 
 def load_model(model_name:str):
-    current_dir = pathlib.Path(__file__).parent
-    pipeline=joblib.load(current_dir /"models" / model_name /f"{model_name}.pkl")
+    pipeline=joblib.load(config.MODEL_DIR / model_name / "model.pkl")
     return pipeline
 def save_evaluation(accuracy:float,matrix:np.array,report:str,model_name:str):
-    current_dir=pathlib.Path(__file__).parent
-    result_dir=current_dir/"models"/model_name
+    result_dir=config.MODEL_DIR/model_name
     result_dir.mkdir(
         parents=True,
         exist_ok=True
@@ -92,14 +90,17 @@ def save_evaluation(accuracy:float,matrix:np.array,report:str,model_name:str):
 
 def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     X,y=split_xy(dataset)    #  先划分原始数据，再训练
+    print(dataset["label"])
+    print(dataset["label"].value_counts(dropna=False))
+    print(dataset["label"].isna().sum())
     X_train, X_test, y_train, y_test = split_dataset(X, y)
     model=create_model(model_type)
     pipeline=build_pipeline(model)
-    pipeline,best_params, best_score = grid_search_cv(pipeline, X_train, y_train,model_type)
-    y_pred=pipeline.predict(X_test)
+    best_pipeline,best_params, best_score = grid_search_cv(pipeline, X_train, y_train,model_type)
+    y_pred=best_pipeline.predict(X_test)
     accuracy, matrix, report = evaluate_model(y_test,y_pred)    
-    save_model(pipeline,model_name)
-    save_evaluation(accuracy,matrix,report,f"{model_name}.txt")
+    save_model(best_pipeline,model_name)
+    save_evaluation(accuracy,matrix,report,model_name)
     print("=" * 40)
     print("Training Finished")
     print("=" * 40)
@@ -108,7 +109,13 @@ def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     print(f"Best Score : {best_score:.4f}")
     print(f"Best Params: {best_params}")
     print("=" * 40)
-    return pipeline
+    return {
+        "model_name": model_name,
+        "model_type": model_type,
+        "accuracy": accuracy,
+        "best_score": best_score,
+        "best_params": best_params
+    }
 
 def predict_one_sample(feature_df:pd.DataFrame,model_name:str):
     pipeline=load_model(model_name)
