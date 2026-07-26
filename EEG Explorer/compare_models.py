@@ -1,6 +1,9 @@
 import machine_learning
 import pandas as pd
-import config
+import config    
+import glob
+import data_pipeline
+import label
 def compare_models(dataset:pd.DataFrame):
     models = [
         ("svm_v1", "svm"),
@@ -12,8 +15,12 @@ def compare_models(dataset:pd.DataFrame):
         result = machine_learning.train_pipeline(dataset,model_type,model_name)
         results.append(result)
     results = sort_results(results)
-    save_csv(results,'model_compare.csv')
-    save_markdown(results,"model_compare.md")
+    save_csv(results)
+    save_markdown(results)
+    print("=" * 50)
+    print("Model comparison completed.")
+    print(f"Results saved to {config.COMPARE_DIR}")
+    print("=" * 50)
     return results
 
 def sort_results(results:list):
@@ -25,7 +32,17 @@ def sort_results(results:list):
 
 
 def save_csv(results:list):
-    df=pd.DataFrame(results)
+    df = pd.DataFrame(
+        [
+            {
+                "model_name": r["model_name"],
+                "accuracy": r["accuracy"],
+                "best_score": r["best_score"],
+                "best_params": str(r["best_params"])
+            }
+            for r in results
+        ]
+    )
     save_path = config.COMPARE_DIR / "model_compare.csv"
     df.to_csv(save_path,index=False,encoding="utf-8-sig")
 
@@ -36,13 +53,13 @@ def save_markdown(results:list):
         f.write("# Model Comparison\n\n")
         f.write("|Rank|Model|Accuracy|CV Score|Best Params|\n")
         f.write("|---|---|---|---|---|\n")
-        for i,result in enumerate(results):
+        for i, result in enumerate(results):
             f.write(
                 f"|{i+1}|"
                 f"{result['model_name']}|"
                 f"{result['accuracy']:.4f}|"
                 f"{result['best_score']:.4f}|"
-                f"{result['best_params']}|\n"
+                f"{str(result['best_params'])}|\n"
             )
         best = results[0]
         f.write("\n## Conclusion\n\n")
@@ -52,3 +69,16 @@ def save_markdown(results:list):
             f"and a cross-validation score of "
             f"**{best['best_score']:.4f}**.\n"
         )
+
+if __name__ == "__main__":
+    files = glob.glob("EEG Explorer/data/*.edf")[:3]
+    features_list = []
+    for file in files:
+        result = data_pipeline.process_one_file(file)
+        if result is None:
+            continue
+        feature_df = result[0]
+        feature_df["label"] = label.get_label(file)
+        features_list.append(feature_df)
+    dataset = pd.concat(features_list, ignore_index=True)
+    compare_models(dataset)
