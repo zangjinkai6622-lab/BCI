@@ -52,7 +52,7 @@ def grid_search_cv(pipeline:Pipeline,X_train:pd.DataFrame,y_train:pd.Series,mode
 def evaluate_model(y_test:pd.DataFrame,y_pred:np.ndarray):
     accuracy=accuracy_score(y_test,y_pred)
     matrix=confusion_matrix(y_test,y_pred) #混淆矩阵
-    report=classification_report(y_test,y_pred)
+    report=classification_report(y_test,y_pred,zero_division=0) #防止因为某个类别一次都没有被预测出来而警告
     return accuracy,matrix,report
 
 
@@ -65,7 +65,7 @@ def load_model(model_name:str):
     pipeline=joblib.load(config.MODEL_DIR / model_name / "model.pkl")
     return pipeline
 def save_evaluation(accuracy:float,matrix:np.array,report:str,model_name:str):
-    result_dir=config.MODEL_DIR/model_name
+    result_dir=config.EVALUATION_DIR/model_name
     result_dir.mkdir(
         parents=True,
         exist_ok=True
@@ -90,9 +90,6 @@ def save_evaluation(accuracy:float,matrix:np.array,report:str,model_name:str):
 
 def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     X,y=split_xy(dataset)    #  先划分原始数据，再训练
-    print(dataset["label"])
-    print(dataset["label"].value_counts(dropna=False))
-    print(dataset["label"].isna().sum())
     X_train, X_test, y_train, y_test = split_dataset(X, y)
     model=create_model(model_type)
     pipeline=build_pipeline(model)

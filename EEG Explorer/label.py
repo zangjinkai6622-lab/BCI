@@ -5,7 +5,14 @@ LABEL_MAP={
     "S001R02.edf":1,
     "S001R03.edf":2
 }
+LABEL_NAME={
+    0:"left_hand",
+    1:"right_hand",
+    2:"foot"
+}
 
 def get_label(file:str):
     filename=os.path.basename(file)
     return LABEL_MAP.get(filename)
+def decode_label(label):
+    return LABEL_NAME.get(label,"unknown")
