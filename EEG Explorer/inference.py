@@ -1,13 +1,22 @@
 import machine_learning
 import data_pipeline
 import numpy as np
+import label
+import prediction as pred
+
 # 运用已有模型进行预测
 def predict_file(file_path):
-    feature_df=data_pipeline.extract_feature(file_path)
-    predictions=machine_learning.predict_one_sample(feature_df,"svm_v1")
-    final_label=vote_prediction(predictions)
-    result=decode_prediction(final_label)
-    return result
+    feature_df = data_pipeline.extract_feature(file_path)
+    prediction = machine_learning.predict_one_sample(feature_df,"svm_v1")
+    final_label = vote_prediction(prediction)
+    prediction_name = label.decode_label(final_label)
+    print(prediction_name)
+    pred.save_prediction_md(
+        file_name=file_path,
+        model_name="svm_v1",
+        prediction=prediction_name
+    )
+    return prediction_name
 # 将预测结果转化为文字
 def decode_prediction(label:int):
     label_map = {
@@ -26,6 +35,6 @@ def vote_prediction(predictions:np.array):
     return max_key
 
 if __name__=="__main__":
-    file="EEG Explorer/data/S001R04.edf"
+    file="EEG Explorer/data/S001R05.edf"
     result=predict_file(file)
     print(result)
