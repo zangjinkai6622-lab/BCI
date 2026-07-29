@@ -4,9 +4,10 @@ import numpy as np
 import label
 import prediction as pred
 import pathlib
+import config
 
 # 运用已有模型进行预测
-def predict_file(file_path, model_name:str="svm_v1"):
+def predict_file(file_path, model_name:str=config.DEFAULT_MODEL_NAME):
     feature_df = data_pipeline.extract_feature(file_path)
     prediction = machine_learning.predict_one_sample(feature_df,model_name)
     final_label = vote_prediction(prediction)
@@ -16,6 +17,7 @@ def predict_file(file_path, model_name:str="svm_v1"):
     
     return {
         "file": pathlib.Path(file_path).name,
+        "prediction": prediction_name,
         "model": model_name
     }
 # 字典的get方法，如果key不存在，则返回默认值，key存在则返回对应的value
