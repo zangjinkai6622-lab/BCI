@@ -5,13 +5,8 @@ import glob
 import data_pipeline
 import label
 def compare_models(dataset:pd.DataFrame):
-    models = [
-        ("svm_v1", "svm"),
-        ("rf_v1", "rf"),
-        ("lr_v1", "lr")
-    ]
     results = []
-    for model_name, model_type in models:
+    for model_name, model_type in config.MODEL_LIST:
         result = machine_learning.train_pipeline(dataset,model_type,model_name)
         results.append(result)
     results = sort_results(results)

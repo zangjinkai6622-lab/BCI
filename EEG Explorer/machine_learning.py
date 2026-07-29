@@ -107,11 +107,14 @@ def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     print(f"Best Params: {best_params}")
     print("=" * 40)
     return {
+        "model": best_pipeline,
         "model_name": model_name,
         "model_type": model_type,
         "accuracy": accuracy,
         "best_score": best_score,
-        "best_params": best_params
+        "best_params": best_params,
+        "confusion_matrix": matrix,
+        "classification_report": report
     }
 
 def predict_one_sample(feature_df:pd.DataFrame,model_name:str):

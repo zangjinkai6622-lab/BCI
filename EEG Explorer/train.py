@@ -3,6 +3,7 @@ import pandas as pd
 import data_pipeline
 import label
 import machine_learning
+import config
 
 def train_main():
     files=glob.glob("EEG Explorer/data/*.edf")[:3]
@@ -15,15 +16,10 @@ def train_main():
         feature_df['label']=label.get_label(file)
         features_list.append(feature_df)
     dataset=pd.concat(features_list,axis=0,ignore_index=True)
-    machine_learning.train_pipeline(dataset=dataset,model_type='svm', model_name="svm_v1")
+    machine_learning.train_pipeline(dataset=dataset,model_type='svm', model_name=config.DEFAULT_MODEL)
 
 def train_all(dataset:pd.DataFrame):
-    models=[
-        ("svm_v1","svm"),
-        ("rf_v1","rf"),
-        ("lr_v1","lr")
-    ]
-    for model_name,model_type in models:
+    for model_name,model_type in config.MODEL_LIST:
         model=machine_learning.create_model(model_type)
         machine_learning.train_pipeline(dataset,model,model_name)
 
