@@ -12,7 +12,7 @@ def train_main():
         result=data_pipeline.process_one_file(file)
         if result is None:
             continue
-        feature_df=result[0]
+        feature_df=result['feature_df']
         feature_df['label']=label.get_label(file)
         features_list.append(feature_df)
     dataset=pd.concat(features_list,axis=0,ignore_index=True)
@@ -21,7 +21,7 @@ def train_main():
 def train_all(dataset:pd.DataFrame):
     for model_name,model_type in config.MODEL_LIST:
         model=machine_learning.create_model(model_type)
-        machine_learning.train_pipeline(dataset,model,model_name)
+        machine_learning.train_pipeline(dataset,model_type,model_name)
 
 if __name__=="__main__":
     train_main()

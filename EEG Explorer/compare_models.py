@@ -72,7 +72,7 @@ if __name__ == "__main__":
         result = data_pipeline.process_one_file(file)
         if result is None:
             continue
-        feature_df = result[0]
+        feature_df = result['feature_df']
         feature_df["label"] = label.get_label(file)
         features_list.append(feature_df)
     dataset = pd.concat(features_list, ignore_index=True)
