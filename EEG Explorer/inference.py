@@ -7,7 +7,7 @@ import pathlib
 import config
 
 # 运用已有模型进行预测
-def predict_file(file_path, model_name:str=config.DEFAULT_MODEL_NAME):
+def predict_file(file_path, model_name:str=config.DEFAULT_MODEL):
     feature_df = data_pipeline.extract_feature(file_path)
     prediction = machine_learning.predict_one_sample(feature_df,model_name)
     final_label = vote_prediction(prediction)

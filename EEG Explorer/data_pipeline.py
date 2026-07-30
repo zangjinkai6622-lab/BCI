@@ -4,6 +4,11 @@ import feature
 import preprocessing
 import analyser
 import visualization
+
+"""
+训练流程使用。
+返回训练所需的特征及分析结果。
+"""
 def process_one_file(file_path:str):
     raw_df = reader.read_edf(file_path)
     if raw_df is None:
@@ -33,7 +38,11 @@ def extract_feature(file_path:str):
     feature_df=feature.create_feature_dataframe(windows,channels)
     return feature_df
 
-
+"""
+完整数据处理流程。
+返回原始数据、预处理结果、分析结果、
+可视化结果和机器学习特征。
+"""
 def process_file(file:str):
     raw_df = reader.read_edf(file)
     if raw_df is None:
