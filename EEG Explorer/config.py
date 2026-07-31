@@ -1,7 +1,12 @@
 from pathlib import Path
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
 
 PROJECT_ROOT=Path(__file__).parent
-
 DATA_DIR=PROJECT_ROOT/'data'
 OUTPUT_DIR=PROJECT_ROOT/'output'
 FIGURE_DIR=OUTPUT_DIR/'figures'
@@ -16,7 +21,7 @@ MODEL_LIST = [
     ("svm_v2", "svm"),
     ("rf_v2", "rf"),
     ("lr_v1", "lr"),
-    ("knn_v1", "knn")
+    # ("knn_v1", "knn")
 ]
 
 
