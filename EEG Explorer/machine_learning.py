@@ -8,7 +8,8 @@ from sklearn.metrics import confusion_matrix
 from sklearn.decomposition import PCA
 from sklearn.metrics import classification_report
 import joblib
-import pathlib
+import logging
+logger = logging.getLogger(__name__)
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
@@ -98,14 +99,14 @@ def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     accuracy, matrix, report = evaluate_model(y_test,y_pred)    
     save_model(best_pipeline,model_name)
     save_evaluation(accuracy,matrix,report,model_name)
-    print("=" * 40)
-    print("Training Finished")
-    print("=" * 40)
-    print(f"Model Name : {model_name}")
-    print(f"Accuracy   : {accuracy:.4f}")
-    print(f"Best Score : {best_score:.4f}")
-    print(f"Best Params: {best_params}")
-    print("=" * 40)
+    logger.info("=" * 40)
+    logger.info("Training Finished")
+    logger.info("=" * 40)
+    logger.info(f"Model Name : {model_name}")
+    logger.info(f"Accuracy   : {accuracy:.4f}")
+    logger.info(f"Best Score : {best_score:.4f}")
+    logger.info(f"Best Params: {best_params}")
+    logger.info("=" * 40)
     return {
         "model": best_pipeline,
         "model_name": model_name,
@@ -125,13 +126,12 @@ def predict_one_sample(feature_df:pd.DataFrame,model_name:str):
 def create_model(model_type:str):
     if model_type == "svm":
         return SVC(kernel="rbf")
-
     elif model_type == "rf":
         return RandomForestClassifier(random_state=42)
-
     elif model_type == "lr":
         return LogisticRegression(max_iter=1000)
-
+    # elif model_type == "knn":
+    #     return KNeighborsClassifier()
     else:
         raise ValueError(f"Unsupported model: {model_type}")
     

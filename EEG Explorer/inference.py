@@ -1,4 +1,6 @@
 import machine_learning
+import logging
+logger = logging.getLogger(__name__)
 import data_pipeline
 import numpy as np
 import label
@@ -12,7 +14,6 @@ def predict_file(file_path, model_name:str=config.DEFAULT_MODEL):
     prediction = machine_learning.predict_one_sample(feature_df,model_name)
     final_label = vote_prediction(prediction)
     prediction_name = label.decode_label(final_label)
-    print(prediction_name)
     pred.save_prediction_md(file_name=file_path,model_name=model_name,prediction=prediction_name)
     
     return {

@@ -1,3 +1,5 @@
+import logging        
+logger = logging.getLogger(__name__)                                                  
 import machine_learning
 import pandas as pd
 import config    
@@ -12,10 +14,10 @@ def compare_models(dataset:pd.DataFrame):
     results = sort_results(results)
     save_csv(results)
     save_markdown(results)
-    print("=" * 50)
-    print("Model comparison completed.")
-    print(f"Results saved to {config.COMPARE_DIR}")
-    print("=" * 50)
+    logger.info("=" * 50)
+    logger.info("Model comparison completed.")
+    logger.info(f"Results saved to {config.COMPARE_DIR}")
+    logger.info("=" * 50)
     return results
 
 def sort_results(results:list):

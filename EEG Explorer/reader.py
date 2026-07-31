@@ -1,5 +1,7 @@
 import pandas as pd
 import mne
+import logging
+logger = logging.getLogger(__name__)
 """
 Read csv file.
 
@@ -16,15 +18,15 @@ def read_csv(path: str):
         df=pd.read_csv(path,encoding='utf-8')
     
     except FileNotFoundError:
-        print("Error: file not found.")
+        logger.error("File not found.")
         return None
 
     except pd.errors.EmptyDataError:
-        print("Error: empty file.")
+        logger.error(f"Empty file: {path}")
         return None
 
     except UnicodeDecodeError:
-        print("Error: encoding error.")
+        logger.error(f"Encoding error: {path}")
         return None
     return df
 
@@ -32,15 +34,15 @@ def read_edf(path: str):
     try:
         raw=mne.io.read_raw_edf(path,preload=True,encoding='utf-8')
     except FileNotFoundError:
-        print("Error: file not found.")
+        logger.error(f"File not found: {path}")
         return None
 
     except pd.errors.EmptyDataError:
-        print("Error: empty file.")
+        logger.warning(f"Empty file: {path}")
         return None
 
     except UnicodeDecodeError:
-        print("Error: encoding error.")
+        logger.error(f"Encoding error: {path}")
         return None
     df=raw.to_data_frame()
     return df
