@@ -95,6 +95,10 @@ def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     model=create_model(model_type)
     pipeline=build_pipeline(model)
     best_pipeline,best_params, best_score = grid_search_cv(pipeline, X_train, y_train,model_type)
+    pca = best_pipeline.named_steps["pca"]
+    original_dim = X_train.shape[1]
+    reduced_dim = pca.n_components_
+    logger.info(f"PCA: original dim = {original_dim} -> reduced dim = {reduced_dim} (preserved 95% variance)")
     y_pred=best_pipeline.predict(X_test)
     accuracy, matrix, report = evaluate_model(y_test,y_pred)    
     save_model(best_pipeline,model_name)

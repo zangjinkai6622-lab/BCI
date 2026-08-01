@@ -1,18 +1,26 @@
-import os
-# label的作用就是标记不同的活动，这也是之后要预测的内容
-LABEL_MAP={
-    "S001R01.edf":0,
-    "S001R02.edf":1,
-    "S001R03.edf":2
+LABEL_NAME = {
+    0: "rest",
+    1: "left_hand",
+    2: "right_hand",
+    3: "both_hands",
+    4: "both_feet"
 }
-LABEL_NAME={
-    0:"left_hand",
-    1:"right_hand",
-    2:"foot"
-}
-
-def get_label(file:str):
-    filename=os.path.basename(file)
-    return LABEL_MAP.get(filename)
 def decode_label(label):
-    return LABEL_NAME.get(label,"unknown")
+    return LABEL_NAME.get(label, "unknown")
+
+def event_to_label(run, event):
+    if event == "T0":
+        return 0
+    # Left / Right
+    if run in [3, 4, 7, 8, 11, 12]:
+        if event == "T1":
+            return 1
+        if event == "T2":
+            return 2
+    # Both Hands / Both Feet
+    if run in [5, 6, 9, 10, 13, 14]:
+        if event == "T1":
+            return 3
+        if event == "T2":
+            return 4
+    return None

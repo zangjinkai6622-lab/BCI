@@ -45,4 +45,4 @@ def read_edf(path: str):
         logger.error(f"Encoding error: {path}")
         return None
     df=raw.to_data_frame()
-    return df
+    return raw, df
