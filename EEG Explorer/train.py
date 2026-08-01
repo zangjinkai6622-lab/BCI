@@ -6,7 +6,7 @@ import machine_learning
 import config
 
 def train_main():
-    files=glob.glob("EEG Explorer/data/*.edf")[:3]
+    files=glob.glob("EEG Explorer/data/*.edf")[:13]
     features_list=[]
     for file in files:
         result=data_pipeline.process_one_file(file)

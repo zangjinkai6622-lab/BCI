@@ -5,10 +5,10 @@ import report
 
 def main():
     result = data_pipeline.process_file(
-        "EEG Explorer/data/S001R05.edf"
+        "EEG Explorer/data/S001R14.edf"
     )
     prediction_result = inference.predict_file(
-        "EEG Explorer/data/S001R05.edf"
+        "EEG Explorer/data/S001R14.edf"
     )
     report.generate_report(
         analysis_result=result["analysis_result"],
