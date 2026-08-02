@@ -10,15 +10,16 @@ import visualization
 返回训练所需的特征及分析结果。
 """
 def process_one_file(file_path:str):
-    raw_df = reader.read_edf(file_path)
+    raw,raw_df = reader.read_edf(file_path)
     if raw_df is None:
         return
     raw_df = channel.normalize_channel_names(raw_df)
     channels=channel.get_available_channels(raw_df)
     clean_df,preprocess_result=preprocessing.preprocess(raw_df,channels)
     analysis_result = analyser.get_features(clean_df,channels)
-    windows=feature.split_windows(clean_df)
-    feature_df=feature.create_feature_dataframe(windows,channels)
+    windows=feature.split_windows(raw,clean_df)
+    run = feature.get_run(file_path)
+    feature_df=feature.create_feature_dataframe(windows,channels,run)
     visualization_result = visualization.get_visualization(preprocess_result, analysis_result,channels)
     return {
         'feature_df':feature_df,
@@ -27,15 +28,16 @@ def process_one_file(file_path:str):
         'visualization_result':visualization_result
     }
 
-def extract_feature(file_path:str):
-    raw_df = reader.read_edf(file_path)
+def extract_feature(file_path: str):
+    raw, raw_df = reader.read_edf(file_path)
     if raw_df is None:
         return
     raw_df = channel.normalize_channel_names(raw_df)
-    channels=channel.get_available_channels(raw_df)
-    clean_df,_=preprocessing.preprocess(raw_df,channels)
-    windows=feature.split_windows(clean_df)
-    feature_df=feature.create_feature_dataframe(windows,channels)
+    channels = channel.get_available_channels(raw_df)
+    clean_df, _ = preprocessing.preprocess(raw_df, channels)
+    windows = feature.split_windows(raw, clean_df)
+    run = feature.get_run(file_path)
+    feature_df = feature.create_feature_dataframe(windows,channels,run)
     return feature_df
 
 """
@@ -44,15 +46,16 @@ def extract_feature(file_path:str):
 可视化结果和机器学习特征。
 """
 def process_file(file:str):
-    raw_df = reader.read_edf(file)
+    raw,raw_df = reader.read_edf(file)
     if raw_df is None:
         return None
     raw_df = channel.normalize_channel_names(raw_df)
     channels = channel.get_available_channels(raw_df)
     filtered_df, preprocess_result = preprocessing.preprocess(raw_df, channels)
     analysis_result = analyser.get_features(filtered_df, channels)
-    windows = feature.split_windows(filtered_df)
-    feature_df = feature.create_feature_dataframe(windows, channels)
+    windows = feature.split_windows(raw,filtered_df)
+    run = feature.get_run(file)
+    feature_df = feature.create_feature_dataframe(windows, channels,run)
     visualization_result = visualization.get_visualization(preprocess_result, analysis_result, channels)
     return {
         "raw_df": raw_df,

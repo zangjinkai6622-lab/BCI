@@ -122,9 +122,10 @@ def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
         "classification_report": report
     }
 
-def predict_one_sample(feature_df:pd.DataFrame,model_name:str):
-    pipeline=load_model(model_name)
-    prediction=pipeline.predict(feature_df)
+def predict_one_sample(feature_df, model_name):
+    pipeline = load_model(model_name)
+    feature_df = feature_df.drop(columns=["label"],errors="ignore")
+    prediction = pipeline.predict(feature_df)
     return prediction
 
 def create_model(model_type:str):
