@@ -31,7 +31,7 @@ def vote_prediction(predictions:np.array):
     return max_key
 
 if __name__=="__main__":
-    file="EEG Explorer/data/S001R05.edf"
+    file="EEG Explorer/data/S001R14.edf"
     result=predict_file(file)
     pred.save_prediction_csv([result])
     print(result["prediction"])

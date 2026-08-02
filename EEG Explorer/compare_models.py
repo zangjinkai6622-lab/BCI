@@ -5,7 +5,7 @@ import pandas as pd
 import config    
 import glob
 import data_pipeline
-import label
+
 def compare_models(dataset:pd.DataFrame):
     results = []
     for model_name, model_type in config.MODEL_LIST:
@@ -68,14 +68,13 @@ def save_markdown(results:list):
         )
 
 if __name__ == "__main__":
-    files = glob.glob("EEG Explorer/data/*.edf")[:3]
+    files = glob.glob("EEG Explorer/data/*.edf")[:13]
     features_list = []
     for file in files:
         result = data_pipeline.process_one_file(file)
         if result is None:
             continue
         feature_df = result['feature_df']
-        feature_df["label"] = label.get_label(file)
         features_list.append(feature_df)
     dataset = pd.concat(features_list, ignore_index=True)
     compare_models(dataset)
