@@ -21,7 +21,7 @@ MODEL_LIST = [
     ("svm_v2", "svm"),
     ("rf_v2", "rf"),
     ("lr_v1", "lr"),
-    # ("knn_v1", "knn")
+    ("knn_v1", "knn")   # =====【修改2-启用KNN】取消注释，方便对比模型时直接使用
 ]
 
 

@@ -160,6 +160,102 @@ def get_interpretation(band_power_result:dict,hjorth_result:dict,entropy_result:
 
 
 
+# =====【修改3-新增MI特征1】相对频带功率：每个频带功率/总功率，减少个体差异影响
+def get_relative_band_power(band_power: dict) -> dict:
+    total = sum(band_power.values())
+    if total <= 0:
+        return {f"relative_{k}": 0.0 for k in band_power.keys()}
+    return {f"relative_{k}": v / total for k, v in band_power.items()}
+
+# =====【修改3-新增MI特征2】频带比值：MI常用指标，如alpha/beta, theta/beta, beta/(alpha+theta)等
+def get_band_ratios(band_power: dict) -> dict:
+    delta = band_power.get("delta", 1e-10)
+    theta = band_power.get("theta", 1e-10)
+    alpha = band_power.get("alpha", 1e-10)
+    beta  = band_power.get("beta",  1e-10)
+    gamma = band_power.get("gamma", 1e-10)
+    # 防止除零
+    eps = 1e-10
+    return {
+        "ratio_alpha_beta":   alpha / (beta + eps),    # 注意力/放松指标
+        "ratio_theta_beta":   theta / (beta + eps),    # 困意/认知负荷
+        "ratio_beta_alpha":   beta  / (alpha + eps),
+        "ratio_beta_theta":   beta  / (theta + eps),
+        "ratio_alpha_theta":  alpha / (theta + eps),
+        "ratio_gamma_beta":   gamma / (beta + eps),
+        "ratio_mu_beta":      alpha / (beta + eps)    # mu = 8-13Hz与alpha重合，MI关键
+    }
+
+# =====【修改3-新增MI特征3】ERD/ERS近似特征：将窗口分成前后两半，计算后段相对前段的功率变化
+# ERD = Event-Related Desynchronization (事件相关去同步，MI时mu/beta功率↓)
+# ERS = Event-Related Synchronization  (事件相关同步，MI后期或对侧功率↑)
+# ERD/ERS公式：(后段功率 - 前段功率) / 前段功率，负值为ERD，正值为ERS
+def get_erd_ers(window_df: pd.DataFrame, channel: str, sampling_rate: int, bands: dict) -> dict:
+    signal = window_df[channel].to_numpy()
+    n = len(signal)
+    half = n // 2
+    if half < 10:
+        return {f"erd_ers_{band}": 0.0 for band in bands.keys()}
+    # 切分前后半段
+    sig_first = signal[:half]
+    sig_last  = signal[half:]
+    # 分别计算两段的频带功率
+    freqs_f, psd_f = scipy.signal.welch(sig_first, fs=sampling_rate, nperseg=min(256, len(sig_first)))
+    freqs_l, psd_l = scipy.signal.welch(sig_last,  fs=sampling_rate, nperseg=min(256, len(sig_last)))
+    result = {}
+    eps = 1e-10
+    for band, (low, high) in bands.items():
+        mask_f = (freqs_f >= low) & (freqs_f <= high)
+        mask_l = (freqs_l >= low) & (freqs_l <= high)
+        power_f = np.trapezoid(psd_f[mask_f], freqs_f[mask_f])
+        power_l = np.trapezoid(psd_l[mask_l], freqs_l[mask_l])
+        # ERD/ERS
+        result[f"erd_ers_{band}"] = (power_l - power_f) / (power_f + eps)
+    return result
+
+# =====【修改3-新增MI特征4】频谱质心(centroid)和边缘频率，描述频谱形状
+def get_spectral_shape(psd_result: dict) -> dict:
+    freq = psd_result["frequency"]
+    psd  = psd_result["psd"]
+    total_power = np.sum(psd) + 1e-10
+    # 频谱质心
+    centroid = np.sum(freq * psd) / total_power
+    # 边缘频率：累积功率达到50%和95%时的频率
+    cum = np.cumsum(psd) / total_power
+    def find_freq(cum_ratio):
+        idx = np.searchsorted(cum, cum_ratio)
+        idx = min(idx, len(freq) - 1)
+        return freq[idx]
+    se50 = find_freq(0.50)
+    se95 = find_freq(0.95)
+    return {
+        "spectral_centroid": centroid,
+        "spectral_edge_50":  se50,
+        "spectral_edge_95":  se95,
+        "spectral_bandwidth": se95 - se50
+    }
+
+# =====【修改3-新增MI特征5】左右运动皮层不对称特征：C3/C4通道的功率差与比值
+# 这是左手/右手MI最核心的判别特征，左手动→C3(左)ERD更强或C4(右)占优
+# 这里作为通用"通道对"函数，后面调用时传入具体的C3/C4、Cz等
+def get_channel_asymmetry(band_power_dict_left: dict, band_power_dict_right: dict, name_left: str, name_right: str) -> dict:
+    results = {}
+    eps = 1e-10
+    for band in band_power_dict_left.keys():
+        pl = band_power_dict_left[band]
+        pr = band_power_dict_right[band]
+        # DAR = Differential Asymmetry Ratio (L-R)/(L+R)，范围[-1,1]
+        dar = (pl - pr) / (pl + pr + eps)
+        # 简单比值
+        ratio = pl / (pr + eps)
+        # 差值
+        diff = pl - pr
+        results[f"dar_{name_left}_{name_right}_{band}"] = dar
+        results[f"ratio_{name_left}_{name_right}_{band}"] = ratio
+        results[f"diff_{name_left}_{name_right}_{band}"]  = diff
+    return results
+
+
 def get_features(df:pd.DataFrame,channels:list):
     fft_result={}
     psd_result={}
