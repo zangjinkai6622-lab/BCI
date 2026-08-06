@@ -23,4 +23,4 @@ def event_to_label(run, event):
             return 3
         if event == "T2":
             return 4
-    return None
+    raise ValueError(f"Unknown event mapping: run={run}, event={event}")
