@@ -6,18 +6,16 @@ import machine_learning
 import config
 
 def train_main():
-    files=glob.glob("EEG Explorer/data/*.edf")[:13]
+    files = sorted(glob.glob(str(config.DATA_DIR / "*.edf")))[:13]
     features_list=[]
     for file in files:
-        result=data_pipeline.process_one_file(file)
+        result=data_pipeline.extract_feature(file)
         if result is None:
-            continue
-        feature_df=result['feature_df']
+            continue 
+        feature_df=result
         features_list.append(feature_df)
-        print(file)
-        print(feature_df["label"].value_counts().sort_index())
-        print("-" * 40)
     dataset=pd.concat(features_list,axis=0,ignore_index=True)
+    machine_learning.train_pipeline(dataset=dataset,model_type='svm', model_name=config.DEFAULT_MODEL)
     print("=" * 50)
     print("Dataset Shape")
     print(dataset.shape)
@@ -36,8 +34,7 @@ def train_main():
 
     print("=" * 50)
     print("Zero Variance Features")
-    print((dataset.drop(columns="label").std() == 0).sum())
-    machine_learning.train_pipeline(dataset=dataset,model_type='svm', model_name=config.DEFAULT_MODEL)
+    print((dataset.drop(columns=["label"]).var() == 0).sum())
 
 def train_all(dataset:pd.DataFrame):
     for model_name,model_type in config.MODEL_LIST:
