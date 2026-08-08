@@ -105,6 +105,35 @@ def get_band_power(psd_result:dict,bands:dict):
         
     return result
 
+# 相对频带功率，每个功率/总功率，求出频带占比，减少不同总功率的差异
+def get_relative_band_power(band_power_result:dict):
+    sum_power=sum(band_power_result.values())    
+    if sum_power == 0:
+        return {band: 0 for band in band_power_result}
+    
+    relative_band_power={}
+    
+    for band,power in band_power_result.items():
+        relative_band_power[band]=power/sum_power
+
+    return relative_band_power
+
+def get_band_ratio(band_power_result:dict):
+    theta_alpha=band_power_result['theta']/ max(band_power_result['alpha'], 1e-10)
+    alpha_beta=band_power_result['alpha']/ max(band_power_result['beta'], 1e-10)
+    theta_beta=band_power_result['theta']/max(band_power_result['beta'], 1e-10)
+    beta_gamma=band_power_result['beta']/ max(band_power_result['gamma'], 1e-10)
+    alpha_theta_beta=(band_power_result['alpha']+band_power_result['theta'])/ max(band_power_result['beta'], 1e-10)
+    return {
+        "theta_alpha":theta_alpha,
+        "alpha_beta":alpha_beta,
+        "theta_beta":theta_beta,
+        "beta_gamma":beta_gamma,
+        "alpha_theta_beta":alpha_theta_beta
+    }
+
+
+
 def get_hjorth(df:pd.DataFrame,column:str):
     signal=df[column].to_numpy()
     first_derivative=np.diff(signal)
@@ -203,3 +232,4 @@ def get_features(df:pd.DataFrame,channels:list):
 
     }
     return analysis_result
+
