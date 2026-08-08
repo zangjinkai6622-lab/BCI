@@ -74,8 +74,12 @@ def create_feature_dataframe(
                 psd_result,
                 config.bands
             )
+            relative_band_power = analyser.get_relative_band_power(band_power)
             for key, value in band_power.items():
                 sample[f"{channel}_band_power_{key}"] = value
+                sample[f"{channel}_relative_band_power_{key}"] = relative_band_power[key]
+            for key, value in relative_band_power.items():
+                sample[f"{channel}_relative_band_power_{key}"] = value
 
             # Hjorth
             hjorth = analyser.get_hjorth(window, channel)
