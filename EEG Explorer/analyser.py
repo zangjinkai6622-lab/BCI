@@ -131,8 +131,18 @@ def get_band_ratio(band_power_result:dict):
         "beta_gamma":beta_gamma,
         "alpha_theta_beta":alpha_theta_beta
     }
-
-
+# 通道不对称,通道间的差异，从而体现大脑不同的活动
+def get_channel_asymmetry(C3_band_power:dict,C4_band_power:dict):
+    c3_alpha=C3_band_power['alpha']
+    c4_alpha=C4_band_power['alpha']
+    c3_beta=C3_band_power['beta']
+    c4_beta=C4_band_power['beta']
+    alpha_asymmetry=(c3_alpha-c4_alpha)/(c3_alpha+c4_alpha)
+    beta_asymmetry=(c3_beta-c4_beta)/(c3_beta+c4_beta)
+    return {
+        "alpha_asymmetry":alpha_asymmetry,
+        "beta_asymmetry":beta_asymmetry
+    }
 
 def get_hjorth(df:pd.DataFrame,column:str):
     signal=df[column].to_numpy()

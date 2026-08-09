@@ -52,6 +52,7 @@ def create_feature_dataframe(
             for key, value in feature.items():
                 sample[f"{ch}_time_domain_{key}"] = value
         # Frequency Features
+        channel_band_power={}
         for channel in channels:
             # FFT
             fft_result = analyser.get_fft(
@@ -74,12 +75,17 @@ def create_feature_dataframe(
                 psd_result,
                 config.bands
             )
+            if(channel == "C3" or channel == "C4"):
+                channel_band_power[channel]=band_power
             relative_band_power = analyser.get_relative_band_power(band_power)
             for key, value in band_power.items():
                 sample[f"{channel}_band_power_{key}"] = value
+                # Relative Band Power
                 sample[f"{channel}_relative_band_power_{key}"] = relative_band_power[key]
-            for key, value in relative_band_power.items():
-                sample[f"{channel}_relative_band_power_{key}"] = value
+            # Band Ratio
+            band_ratio = analyser.get_band_ratio(band_power)
+            for key, value in band_ratio.items():
+                sample[f"{channel}_band_ratio_{key}"] = value
 
             # Hjorth
             hjorth = analyser.get_hjorth(window, channel)
@@ -89,6 +95,16 @@ def create_feature_dataframe(
             entropy = analyser.get_entropy(window, channel)
             for key, value in entropy.items():
                 sample[f"{channel}_entropy_{key}"] = value
+
+    # channel asymmetry
+        c3_band_power = channel_band_power["C3"]
+        c4_band_power = channel_band_power["C4"]
+        asymmetry = analyser.get_channel_asymmetry(
+            c3_band_power,
+            c4_band_power
+        )
+        for key, value in asymmetry.items():
+            sample[key] = value
 
         # Label
         sample["label"] = label.event_to_label(
