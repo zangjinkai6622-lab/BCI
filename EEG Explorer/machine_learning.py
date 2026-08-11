@@ -38,7 +38,7 @@ def split_dataset(X:pd.DataFrame,y:pd.DataFrame):
 def build_pipeline(model):
     pipeline = Pipeline([
         ("scaler", StandardScaler()),
-        ("pca", PCA(n_components=0.95)),
+        # ("pca", PCA(n_components=0.99)),
         ("model", model)
     ])
     return pipeline
@@ -103,7 +103,7 @@ def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     pca = best_pipeline.named_steps["pca"]
     original_dim = X_train.shape[1]
     reduced_dim = pca.n_components_
-    logger.info(f"PCA: original dim = {original_dim} -> reduced dim = {reduced_dim} (preserved 95% variance)")
+    logger.info(f"PCA: original dim = {original_dim} -> reduced dim = {reduced_dim} (preserved 99% variance)")
     y_pred=best_pipeline.predict(X_test)
     logger.info("Prediction Distribution:")
     logger.info("\n%s", pd.Series(y_pred).value_counts().sort_index())

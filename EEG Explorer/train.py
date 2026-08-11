@@ -6,7 +6,8 @@ import machine_learning
 import config
 
 def train_main():
-    files = sorted(glob.glob(str(config.DATA_DIR / "*.edf")))[:13]
+    all_gdf = sorted(glob.glob(str(config.DATA_DIR / "*.gdf")))
+    files = [f for f in all_gdf if f.endswith("T.gdf")]
     features_list=[]
     for file in files:
         result=data_pipeline.extract_feature(file)
@@ -15,7 +16,7 @@ def train_main():
         feature_df=result
         features_list.append(feature_df)
     dataset=pd.concat(features_list,axis=0,ignore_index=True)
-    machine_learning.train_pipeline(dataset=dataset,model_type='rf', model_name=config.DEFAULT_MODEL)
+    machine_learning.train_pipeline(dataset=dataset, model_type='svm', model_name='svm_v2')
     print("=" * 50)
     print("Dataset Shape")
     print(dataset.shape)

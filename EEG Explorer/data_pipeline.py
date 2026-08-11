@@ -29,7 +29,8 @@ def process_one_file(file_path:str):
     }
 
 def extract_feature(file_path: str):
-    raw, raw_df = reader.read_edf(file_path)
+    # raw, raw_df = reader.read_edf(file_path)
+    raw, raw_df = reader.read_gdf(file_path)
     if raw_df is None:
         return
     raw_df = channel.normalize_channel_names(raw_df)
