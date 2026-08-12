@@ -11,43 +11,89 @@ def get_run(file_path: str):
         return int(match.group(1))
     return None
 def split_windows(raw, df: pd.DataFrame):
-    sfreq = raw.info["sfreq"]          # 采用数据自带的实际采样率
+    sfreq = raw.info["sfreq"]
     n_samples = len(df)
     strategy = config.WINDOW_STRATEGY
     windows = []
 
-    skipped_counts = {"skip_code": 0, "unlabeled": 0}
-    for idx, (onset, duration, event) in enumerate(zip(
-        raw.annotations.onset,
-        raw.annotations.duration,
-        raw.annotations.description
-    )):
-        # ---- 非 trial 事件 & 无标签事件 过滤（BCI IV 2a 的数字码） ----
-        # event 可能是 int/float（BCI IV 2a）或 str（旧数据 T0/T1/T2）
+    skipped_counts = {
+        "skip_code": 0,
+        "unlabeled": 0,
+        "invalid_window": 0
+    }
+
+    for idx, (onset, duration, event) in enumerate(
+        zip(
+            raw.annotations.onset,
+            raw.annotations.duration,
+            raw.annotations.description
+        )
+    ):
+
+        # --------------------------------------------------
+        # 1. 尝试转换事件码
+        # --------------------------------------------------
         try:
             ev_code = int(event)
         except (ValueError, TypeError):
             ev_code = None
+
+        # --------------------------------------------------
+        # 2. 跳过明确不参与训练的事件
+        # --------------------------------------------------
         if ev_code is not None:
+
             if ev_code in config.SKIP_EVENT_CODES:
                 skipped_counts["skip_code"] += 1
                 continue
+
             if ev_code in config.BCI2A_UNLABELED_CODES:
                 skipped_counts["unlabeled"] += 1
                 continue
 
-        # ---- 按策略显式计算时间窗 (秒) ----
+        # --------------------------------------------------
+        # 3. 获取真实标签
+        # --------------------------------------------------
+        event_label = label.event_to_label(
+            None,
+            event
+        )
+
+        # BCI IV 2a 白名单之外的事件全部跳过
+        if event_label is None:
+            skipped_counts["unlabeled"] += 1
+            continue
+
+        # --------------------------------------------------
+        # 4. 根据窗口策略确定时间范围
+        # --------------------------------------------------
         if strategy == "annotation":
+
             if duration < config.ANNOT_MIN_DURATION_SEC:
-                print(f"[split_windows] 跳过 idx={idx} event={event}: "
-                      f"duration={duration:.3f}s < ANNOT_MIN_DURATION_SEC={config.ANNOT_MIN_DURATION_SEC}s")
                 continue
-            t_start = onset + config.ANNOT_PAD_START_SEC
-            t_end   = onset + duration + config.ANNOT_PAD_END_SEC
+
+            t_start = (
+                onset +
+                config.ANNOT_PAD_START_SEC
+            )
+
+            t_end = (
+                onset +
+                duration +
+                config.ANNOT_PAD_END_SEC
+            )
 
         elif strategy == "fixed_offset":
-            t_start = onset + config.FIXED_WINDOW_TMIN
-            t_end   = onset + config.FIXED_WINDOW_TMAX
+
+            t_start = (
+                onset +
+                config.FIXED_WINDOW_TMIN
+            )
+
+            t_end = (
+                onset +
+                config.FIXED_WINDOW_TMAX
+            )
 
         else:
             raise ValueError(
@@ -55,33 +101,65 @@ def split_windows(raw, df: pd.DataFrame):
                 f"可选值: 'annotation' | 'fixed_offset'"
             )
 
-        # ---- 转样本索引 + 边界 clamp ----
-        start = max(0, int(round(t_start * sfreq)))
-        end   = min(n_samples, int(round(t_end * sfreq)))
+        # --------------------------------------------------
+        # 5. 秒 → sample
+        # --------------------------------------------------
+        start = max(
+            0,
+            int(round(t_start * sfreq))
+        )
 
-        # ---- 最小窗口长度 & 空窗口跳过 ----
-        if end - start < config.MIN_WINDOW_SAMPLES:
-            print(f"[split_windows] 跳过 idx={idx} event={event}: "
-                  f"窗口过短 samples={end - start} (需要 >= {config.MIN_WINDOW_SAMPLES}), "
-                  f"t=[{t_start:.2f},{t_end:.2f}]s -> idx=[{start},{end}]")
+        end = min(
+            n_samples,
+            int(round(t_end * sfreq))
+        )
+
+        # --------------------------------------------------
+        # 6. 检查窗口长度
+        # --------------------------------------------------
+        window_length = end - start
+
+        if window_length < config.MIN_WINDOW_SAMPLES:
+            skipped_counts["invalid_window"] += 1
             continue
 
         window = df.iloc[start:end]
+
         if window.empty:
-            print(f"[split_windows] 跳过 idx={idx} event={event}: window 为空 DataFrame")
+            skipped_counts["invalid_window"] += 1
             continue
 
+        # --------------------------------------------------
+        # 7. 保存窗口 + 事件 + 标签
+        # --------------------------------------------------
         windows.append({
             "event": event,
+            "label": event_label,
             "window": window
         })
 
+    # ------------------------------------------------------
+    # 输出检查信息
+    # ------------------------------------------------------
     for i, item in enumerate(windows):
-        print(i, item["event"], item["window"].shape)
-    print(f"[split_windows] 策略={strategy}, 采样率={sfreq}Hz, "
-          f"数据总行数={n_samples}, 成功切出窗口数={len(windows)} "
-          f"(过滤掉非 trial 事件数={skipped_counts['skip_code']}, "
-          f"无标签评估事件数={skipped_counts['unlabeled']})")
+        print(
+            i,
+            "event=", item["event"],
+            "label=", item["label"],
+            "shape=", item["window"].shape
+        )
+
+    print(
+        f"[split_windows] "
+        f"策略={strategy}, "
+        f"采样率={sfreq}Hz, "
+        f"数据总行数={n_samples}, "
+        f"成功切出窗口数={len(windows)}, "
+        f"skip_code={skipped_counts['skip_code']}, "
+        f"unlabeled={skipped_counts['unlabeled']}, "
+        f"invalid_window={skipped_counts['invalid_window']}"
+    )
+
     return windows
 
 def create_feature_dataframe(
@@ -94,6 +172,7 @@ def create_feature_dataframe(
     for item in windows:
         window = item["window"]
         event = item["event"]
+        event_label = item["label"]
         sample = {}
 
         # Time Domain
@@ -165,11 +244,8 @@ def create_feature_dataframe(
             sample["alpha_asymmetry"] = np.nan
             sample["beta_asymmetry"] = np.nan
 
-        # Label
-        sample["label"] = label.event_to_label(
-            run,
-            event
-        )
+        # Label（直接使用 split_windows 阶段已确定好的 event_label，不做二次映射）
+        sample["label"] = event_label
         features.append(sample)
     feature_df = pd.DataFrame(features)
     feature_df = feature_df.astype(float)

@@ -47,8 +47,6 @@ HIGHCUT=40
 NOTCH_FREQ=50
 NOTCH_Q=30
 
-window_size=1600
-
 
 # 窗口切分策略 - 按数据集显式配置
 # 可选策略: "annotation" | "fixed_offset"
@@ -64,11 +62,14 @@ ANNOT_PAD_END_SEC = 0.0
 # fixed_offset 模式（BCI IV 2a 用，标准 MI 范式：提示音后 0.5s~4.5s 共 4s）
 FIXED_WINDOW_TMIN = 0.5
 FIXED_WINDOW_TMAX = 4.5
+# 由 TMIN/TMAX 自动推导出窗口样本数（避免手写不一致）
+# (4.5 - 0.5) * 250 = 1000 samples
+FIXED_WINDOW_SAMPLES = int(round((FIXED_WINDOW_TMAX - FIXED_WINDOW_TMIN) * SAMPLING_RATE))
 
 # 通用参数（两种模式都用）
 MIN_WINDOW_SAMPLES = 50
 
-# 数据集事件过滤 & 标签映射
+# 数据集事件过滤
 # BCI IV 2a 等数据集的非 trial 事件码：切窗口时直接跳过（不生成训练样本）
 SKIP_EVENT_CODES = {
     32766,   # Boundary / Comment 边界标记（GDF特有）
@@ -79,13 +80,6 @@ SKIP_EVENT_CODES = {
     772,     # Tongue 舌头（项目未定义该类别，按方案 A 直接跳过）
 }
 
-# BCI IV 2a 标签事件码 → 项目统一标签整数（与 label.LABEL_NAME 对齐）
-# 当前保留三分类 + rest：769左手 / 770右手 / 771双脚（772 舌头已加入 SKIP_EVENT_CODES 跳过）
-BCI2A_EVENT_TO_LABEL = {
-    769: 1,   # left_hand
-    770: 2,   # right_hand
-    771: 4,   # both_feet
-}
-
 # 无标签事件码（BCI IV 2a 评估集 E 文件用，训练阶段应跳过）
+# 注意：event -> label 映射统一实现在 label.py 的 _BCI2A_LABEL_MAP（白名单逻辑）
 BCI2A_UNLABELED_CODES = {768, 783}
