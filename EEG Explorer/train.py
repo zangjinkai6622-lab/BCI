@@ -17,25 +17,6 @@ def train_main():
         features_list.append(feature_df)
     dataset=pd.concat(features_list,axis=0,ignore_index=True)
     machine_learning.train_pipeline(dataset=dataset, model_type='svm', model_name='svm_v2')
-    print("=" * 50)
-    print("Dataset Shape")
-    print(dataset.shape)
-
-    print("=" * 50)
-    print("Feature Preview")
-    print(dataset.iloc[:5, :10])
-
-    print("=" * 50)
-    print("Feature Mean By Label")
-    print(dataset.groupby("label").mean().iloc[:, :10])
-
-    print("=" * 50)
-    print("NaN Count")
-    print(dataset.isna().sum().sum())
-
-    print("=" * 50)
-    print("Zero Variance Features")
-    print((dataset.drop(columns=["label"]).var() == 0).sum())
 
 def train_all(dataset:pd.DataFrame):
     for model_name,model_type in config.MODEL_LIST:

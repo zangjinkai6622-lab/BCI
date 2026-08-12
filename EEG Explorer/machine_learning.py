@@ -38,7 +38,7 @@ def split_dataset(X:pd.DataFrame,y:pd.DataFrame):
 def build_pipeline(model):
     pipeline = Pipeline([
         ("scaler", StandardScaler()),
-        # ("pca", PCA(n_components=0.99)),
+        ("pca", PCA(n_components=0.99)),
         ("model", model)
     ])
     return pipeline
@@ -100,10 +100,13 @@ def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
     model=create_model(model_type)
     pipeline=build_pipeline(model)
     best_pipeline,best_params, best_score = grid_search_cv(pipeline, X_train, y_train,model_type)
-    pca = best_pipeline.named_steps["pca"]
     original_dim = X_train.shape[1]
-    reduced_dim = pca.n_components_
-    logger.info(f"PCA: original dim = {original_dim} -> reduced dim = {reduced_dim} (preserved 99% variance)")
+    if "pca" in best_pipeline.named_steps:
+        pca = best_pipeline.named_steps["pca"]
+        reduced_dim = pca.n_components_ #标记降到多少维
+        logger.info(f"PCA: original dim = {original_dim} -> reduced dim = {reduced_dim} (preserved 99% variance)")
+    else:
+        logger.info(f"No PCA applied, using full feature space (dim = {original_dim})")
     y_pred=best_pipeline.predict(X_test)
     logger.info("Prediction Distribution:")
     logger.info("\n%s", pd.Series(y_pred).value_counts().sort_index())
