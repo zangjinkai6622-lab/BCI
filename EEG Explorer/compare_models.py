@@ -68,7 +68,8 @@ def save_markdown(results:list):
         )
 
 if __name__ == "__main__":
-    files = glob.glob("EEG Explorer/data/*.edf")[:13]
+    all_gdf = sorted(glob.glob(str(config.DATA_DIR / "*.gdf")))
+    files = [f for f in all_gdf if f.endswith("T.gdf")]
     features_list = []
     for file in files:
         result = data_pipeline.process_one_file(file)
