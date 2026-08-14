@@ -94,9 +94,29 @@ def save_evaluation(accuracy:float,matrix:np.array,report:str,model_name:str):
             f.write("【混淆矩阵 (Confusion Matrix)】\n")
             f.write(str(matrix) + "\n\n")
 
-def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str):
-    X,y=split_xy(dataset)    #  先划分原始数据，再训练
-    X_train, X_test, y_train, y_test = split_dataset(X, y)
+def train_pipeline(dataset:pd.DataFrame,model_type:str,model_name:str, sample_split=None):
+    """
+    sample_split: 可选，tuple (train_idx: np.ndarray, test_idx: np.ndarray)
+        - 如果传入：用传入的行索引切 train/test，保证不同特征子集之间划分 100% 一致（消融实验必须用）
+        - 如果 None（默认）：走原来的 split_dataset，随机 80/20 + random_state=42
+    """
+    X, y = split_xy(dataset)
+
+    # -------------------- 数据切分：外部传入 or 内部分 --------------------
+    if sample_split is not None:
+        train_idx, test_idx = sample_split
+        X_train = X.iloc[train_idx].reset_index(drop=True)
+        X_test  = X.iloc[test_idx].reset_index(drop=True)
+        y_train = y.iloc[train_idx].reset_index(drop=True)
+        y_test  = y.iloc[test_idx].reset_index(drop=True)
+        # 仍然打印分布，方便和之前的对齐
+        print("Train")
+        print(y_train.value_counts().sort_index())
+        print("Test")
+        print(y_test.value_counts().sort_index())
+    else:
+        X_train, X_test, y_train, y_test = split_dataset(X, y)
+
     model=create_model(model_type)
     pipeline=build_pipeline(model)
     best_pipeline,best_params, best_score = grid_search_cv(pipeline, X_train, y_train,model_type)
