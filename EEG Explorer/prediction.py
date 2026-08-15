@@ -23,11 +23,7 @@ def save_prediction_md(file_name: str, model_name: str, prediction: str):
 
 
 def save_prediction_csv(results: list):
-    """
-    保存预测明细到 CSV：
-    - 原接口是 list[dict]（每个 dict 一行）
-    - 现在 inference 输出的 216 条逐 trial 明细直接传进来就是 216 行 CSV
-    """
+
     df = pd.DataFrame(results)
     save_path = config.PREDICTION_DIR / "prediction.csv"
     df.to_csv(
@@ -47,17 +43,7 @@ def save_prediction_details_md(
     per_class_acc: dict,
     pred_dist: pd.Series,
 ):
-    """
-    逐 trial 明细预测报告（216 trials × 一行一个预测）
-    参数：
-        file_name       : 原始数据文件路径
-        model_name      : 模型名
-        details         : list[dict]，每个 trial 一条（含 trial_idx、真值、预测、correct 等）
-        n_correct       : 正确预测数量
-        accuracy        : 整体准确率（百分比，0~100）
-        per_class_acc   : dict  {label_name: (true_count, acc_pct)}
-        pred_dist       : pd.Series  value_counts（预测分布）
-    """
+
     save_dir = config.PREDICTION_DIR
     save_dir.mkdir(parents=True, exist_ok=True)
     file_stem = pathlib.Path(file_name).stem
