@@ -16,8 +16,7 @@ def train_main():
         feature_df=result
         features_list.append(feature_df)
     dataset=pd.concat(features_list,axis=0,ignore_index=True)
-    machine_learning.train_pipeline(dataset=dataset, model_type='svm', model_name='svm_v2')
-
+    machine_learning.train_pipeline(dataset=dataset, model_type='lgbm', model_name='lgbm_v1')
 def train_all(dataset:pd.DataFrame):
     for model_name,model_type in config.MODEL_LIST:
         model=machine_learning.create_model(model_type)

@@ -15,13 +15,15 @@ MODEL_DIR = PROJECT_ROOT / "models"
 EVALUATION_DIR = OUTPUT_DIR / "evaluation"
 COMPARE_DIR = OUTPUT_DIR / "comparison"
 PREDICTION_DIR = OUTPUT_DIR / "prediction"
-ABLATION_DIR = OUTPUT_DIR / "ablation"
 DEFAULT_MODEL="svm_v1"
 DEFAULT_MODEL_TYPE="svm"
 MODEL_LIST = [
     ("svm_v2", "svm"),
     ("rf_v2", "rf"),
-    ("lr_v1", "lr")
+    ("lr_v1", "lr"),
+    ("knn_v1", "knn"),
+    ("xgb_v1", "xgb"),
+    ("lgbm_v1", "lgbm")
 ]
 
 DIRS=[PROJECT_ROOT,DATA_DIR,OUTPUT_DIR,FIGURE_DIR,REPORT_DIR,MODEL_DIR,COMPARE_DIR,PREDICTION_DIR,EVALUATION_DIR]
