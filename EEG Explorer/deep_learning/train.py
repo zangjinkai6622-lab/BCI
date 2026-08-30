@@ -5,13 +5,14 @@ from model import model
 
 
 loss_fn = nn.CrossEntropyLoss()
-optimizer = torch.optim.Adam(
+optimizer = torch.optim.Adam( #Adam会根据历史gradient自动调整不同参数的更新幅度，公式复杂
     model.parameters(),
-    lr=0.001,
-    weight_decay=1e-4
+    lr=0.001,  #learniong_rate 学习率,Learning Rate 决定参数每次更新的步长
+    weight_decay=1e-4 #限制参数过度变大，让模型不要过度依赖训练数据，一种正则化手段
 )
+# optimizer.step()背后就是根据gradient和lr计算新的w，比如SGD就是w=w-lr*graident
 
-scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR( #Scheduler：调整 Optimizer 使用的 Learning Rate。
     optimizer,
     T_max=50
 )
