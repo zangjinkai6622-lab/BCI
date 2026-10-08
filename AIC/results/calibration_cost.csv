@@ -1,0 +1,7 @@
+﻿model,n_labeled_per_class,n_labeled_total,accuracy_mean,accuracy_std,macro_f1_mean,macro_f1_std
+eegnet,20,60,0.358,0.0273,0.314,0.048
+stfa,20,60,0.5021,0.1226,0.4351,0.1754
+eegnet,40,120,0.3508,0.0387,0.318,0.0605
+stfa,40,120,0.5679,0.1305,0.5257,0.1761
+eegnet,72,216,0.4336,0.1092,0.425,0.1124
+stfa,72,216,0.6055,0.1354,0.5786,0.164

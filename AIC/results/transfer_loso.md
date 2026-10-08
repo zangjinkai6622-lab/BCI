@@ -1,0 +1,3 @@
+| dataset | setting | model | n_seeds | EA | accuracy_mean | accuracy_std | macro_f1_mean | macro_f1_std |
+|---|---|---|---|---|---|---|---|---|
+| BCI_IV_2a | LOSO_transfer | stfa_from_2b | 3 | True | 0.5248 | 0.1513 | 0.4931 | 0.1681 |

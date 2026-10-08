@@ -1,0 +1,9 @@
+﻿metric,value,note
+gdf_per_trial_seconds,9.3,18 个真实场次 n_times/sfreq/288 平均
+labeled_acquisition_minutes_120,18.6,120 个有标签试验的纯范式录制时间（不含戴帽准备）
+cpu_train_seconds_eegnet_120,4.9,"CPU 4 线程，被试 (1, 2, 3)，100 轮/早停口径"
+cpu_train_seconds_stfa_120,45.4,"CPU 4 线程，被试 (1, 2, 3)，100 轮/早停口径"
+ea_estimate_seconds_K8,0.0042,无标签：协方差+R^-1/2+左乘，CPU 4 线程，3 次均值
+ea_estimate_seconds_K16,0.0017,无标签：协方差+R^-1/2+左乘，CPU 4 线程，3 次均值
+ea_estimate_seconds_K32,0.0032,无标签：协方差+R^-1/2+左乘，CPU 4 线程，3 次均值
+ea_estimate_seconds_K216,0.0225,无标签：协方差+R^-1/2+左乘，CPU 4 线程，3 次均值

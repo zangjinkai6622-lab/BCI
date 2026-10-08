@@ -7,5 +7,21 @@
 /日志.assets
 /.gitignore
 /__pycache__
-models/
+/models/
+
+# ========== AIC 项目 GitHub 提交筛选 ==========
+# 预处理数据缓存（约 1.4GB，可由原始 GDF 重新生成，不提交）
+AIC/cache/
+# Python 编译缓存（AIC 下所有层级）
+AIC/**/__pycache__/
+# 训练输出的模型权重目录（demo 演示权重 demo_model_official.pt 保留）
+AIC/checkpoints/
+# 参赛提交打包目录（内含 24MB “代码自身 zip”，放进 git 会递归冗余）
+AIC/提交材料/
+# 一次性临时脚本与来历不明的临时 PDF
+AIC/_chk_2b_events.py
+AIC/23cb00dfd928747e2586838e293a461f_1721319791603141.pdf
+# 重复 / 过期材料（正式视频保留 demo 目录版本；答辩稿已被答辩准备材料取代）
+AIC/proposal/演示视频_机械臂意念控制的自适应脑电解码算法.mp4
+AIC/proposal/答辩稿.docx
 

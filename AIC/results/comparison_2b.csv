@@ -1,0 +1,4 @@
+﻿dataset,setting,model,n_seeds,accuracy_mean,accuracy_std,macro_f1_mean,macro_f1_std,params,inference_ms
+BCI_IV_2b,subject_dependent,eegnet,3,0.7505,0.0138,0.7502,0.014,2146,0.0132
+BCI_IV_2b,subject_dependent,stfa,3,0.769,0.0051,0.7689,0.0052,9558,0.0557
+BCI_IV_2b,subject_dependent,stfa_light,3,0.7591,0.0083,0.7587,0.0081,2568,0.0562

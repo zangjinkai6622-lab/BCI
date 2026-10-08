@@ -1,0 +1,3 @@
+| setting | model | n_seeds | EA | accuracy_mean | accuracy_std | macro_f1_mean | macro_f1_std |
+|---|---|---|---|---|---|---|---|
+| LOSO_transfer_DG | stfa_dg_from_2b | 3 | True | 0.5104 | 0.1502 | 0.4689 | 0.1726 |

@@ -1,0 +1,5 @@
+| setting | model | n_seeds | EA | accuracy_mean | accuracy_std | macro_f1_mean | macro_f1_std | inference_ms |
+|---|---|---|---|---|---|---|---|---|
+| subject_independent_LOSO | eegnet | 5 | True | 0.5573 | 0.152 | 0.5331 | 0.1758 | 0.0127 |
+| subject_independent_LOSO | stfa | 5 | True | 0.5157 | 0.1532 | 0.4777 | 0.1756 | 0.1507 |
+| subject_independent_LOSO | stfa_dg | 5 | True | 0.5155 | 0.1489 | 0.4782 | 0.1713 | 0.1501 |

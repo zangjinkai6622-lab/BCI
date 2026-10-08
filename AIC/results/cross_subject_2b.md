@@ -1,0 +1,4 @@
+| dataset | setting | model | n_seeds | EA | accuracy_mean | accuracy_std | macro_f1_mean | macro_f1_std |
+|---|---|---|---|---|---|---|---|---|
+| BCI_IV_2b | LOSO | eegnet | 3 | True | 0.6899 | 0.0514 | 0.6756 | 0.0539 |
+| BCI_IV_2b | LOSO | stfa_light | 3 | True | 0.6651 | 0.0604 | 0.6455 | 0.0603 |
